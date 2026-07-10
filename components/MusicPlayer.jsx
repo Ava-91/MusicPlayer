@@ -1,30 +1,53 @@
 "use client";
 
 import songs from "@/data/songs.json";
+import { useState } from "react";
 
 import AlbumCover from "./AlbumCover";
-import SongInfo from "./SongInfo";
 import Controls from "./Controls";
-import ProgressBar from "./ProgressBar";
-import VolumeControl from "./VolumeControl";
-import Playlist from "./Playlist";
 
 export default function MusicPlayer() {
+  const [currentSong, setCurrentSong] = useState(songs[0]);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  function handlePlayPause() {
+    setIsPlaying(!isPlaying);
+  }
+
   return (
-    <div className="w-full max-w-6xl rounded-3xl bg-white/5 p-8 backdrop-blur-xl">
+    <section
+      className="
+      w-full
+      max-w-md
+      rounded-3xl
+      bg-white/5
+      border
+      border-white/10
+      backdrop-blur-xl
+      shadow-2xl
+      p-8
+      space-y-8
+    "
+    >
+      <AlbumCover
+        cover={currentSong.cover}
+        title={currentSong.title}
+      />
 
-      <AlbumCover />
+      <div className="text-center">
+        <h1 className="text-3xl font-bold">
+          {currentSong.title}
+        </h1>
 
-      <SongInfo />
+        <p className="text-zinc-400 mt-2">
+          {currentSong.artist}
+        </p>
+      </div>
 
-      <ProgressBar />
-
-      <Controls />
-
-      <VolumeControl />
-
-      <Playlist songs={songs} />
-
-    </div>
+      <Controls
+        isPlaying={isPlaying}
+        onPlayPause={handlePlayPause}
+      />
+    </section>
   );
 }
