@@ -1,7 +1,42 @@
-export default function AlbumCover(){
-    return(
-        <div>
-            
-        </div>
-    )
+export default function AlbumCover({ cover, title }) {
+  return (
+    <div
+      className="
+        relative
+        mx-auto
+        w-72
+        h-72
+        rounded-3xl
+        overflow-hidden
+        shadow-[0_20px_60px_rgba(30,64,175,0.35)]
+        border
+        border-white/10
+        bg-zinc-900
+      "
+    >
+      <img
+        src={cover}
+        alt={title}
+        className="
+          w-full
+          h-full
+          object-cover
+          transition
+          duration-500
+          hover:scale-105
+        "
+      />
+
+      <div
+        className="
+          absolute
+          inset-0
+          bg-gradient-to-t
+          from-black/40
+          via-transparent
+          to-transparent
+        "
+      />
+    </div>
+  );
 }

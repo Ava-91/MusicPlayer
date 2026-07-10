@@ -1,14 +1,8 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const geist = Geist({
   subsets: ["latin"],
 });
 
@@ -18,7 +12,7 @@ export const metadata: Metadata = {
     template: "%s | MusicPlayer",
   },
   description:
-    "A beautiful modern music player built with Next.js, React and Tailwind CSS. Featuring glassmorphism, glowing UI, smooth animations and cozy late-night coding vibes.",
+    "A modern music player built with Next.js, React and Tailwind CSS.",
 };
 
 export default function RootLayout({
@@ -27,20 +21,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable}`}
-    >
+    <html lang="en">
       <body
-        className="
-          min-h-screen
-          bg-zinc-950
-          text-white
-          antialiased
-          overflow-x-hidden
-          selection:bg-blue-500
-          selection:text-white
-        "
+        className={`${geist.className} bg-zinc-950 text-white min-h-screen antialiased`}
       >
         {children}
       </body>
