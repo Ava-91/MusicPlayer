@@ -31,7 +31,7 @@ export default function AlbumCover({ cover, title }) {
         className="
           absolute
           inset-0
-          bg-gradient-to-t
+          bg-linear-to-t
           from-black/40
           via-transparent
           to-transparent
