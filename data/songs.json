@@ -1,0 +1,74 @@
+[
+  {
+    "id": 1,
+    "title": "BIRDS OF A FEATHER(slowed & reverb)",
+    "artist": "Billie Eilish",
+    "cover": "/covers/birds-of-a-feather.jpg",
+    "audio": "/songs/birds-of-a-feather.mp3",
+    "duration": "4:12"
+  },
+  {
+    "id": 2,
+    "title": "BITTERSUITE(slowed & reverb)",
+    "artist": "Billie Eilish",
+    "cover": "/covers/bittersuite.jpg",
+    "audio": "/songs/bittersuite.mp3",
+    "duration": "5:50"
+  },
+  {
+    "id": 3,
+    "title": "BITTERSUITE(slowed & reverb)",
+    "artist": "Billie Eilish",
+    "cover": "/covers/bittersuite.jpg",
+    "audio": "/songs/bittersuite.mp3",
+    "duration": "5:50"
+  },
+    {
+    "id": 4,
+    "title": "BITTERSUITE(slowed & reverb)",
+    "artist": "Billie Eilish",
+    "cover": "/covers/bittersuite.jpg",
+    "audio": "/songs/bittersuite.mp3",
+    "duration": "5:50"
+  },
+    {
+    "id": 5,
+    "title": "BITTERSUITE(slowed & reverb)",
+    "artist": "Billie Eilish",
+    "cover": "/covers/bittersuite.jpg",
+    "audio": "/songs/bittersuite.mp3",
+    "duration": "5:50"
+  },
+    {
+    "id": 6,
+    "title": "BITTERSUITE(slowed & reverb)",
+    "artist": "Billie Eilish",
+    "cover": "/covers/bittersuite.jpg",
+    "audio": "/songs/bittersuite.mp3",
+    "duration": "5:50"
+  },
+    {
+    "id": 7,
+    "title": "BITTERSUITE(slowed & reverb)",
+    "artist": "Billie Eilish",
+    "cover": "/covers/bittersuite.jpg",
+    "audio": "/songs/bittersuite.mp3",
+    "duration": "5:50"
+  },
+    {
+    "id": 8,
+    "title": "BITTERSUITE(slowed & reverb)",
+    "artist": "Billie Eilish",
+    "cover": "/covers/bittersuite.jpg",
+    "audio": "/songs/bittersuite.mp3",
+    "duration": "5:50"
+  },
+    {
+    "id": 9,
+    "title": "BITTERSUITE(slowed & reverb)",
+    "artist": "Billie Eilish",
+    "cover": "/covers/bittersuite.jpg",
+    "audio": "/songs/bittersuite.mp3",
+    "duration": "5:50"
+  }
+]
