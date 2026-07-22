@@ -1,36 +1,56 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import songs from "@/data/songs.json";
 
 import AlbumCover from "./AlbumCover";
 import Controls from "./Controls";
 
 export default function MusicPlayer() {
+  const [songs, setSongs] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+
   const [isPlaying, setIsPlaying] = useState(false);
+
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
   const audioRef = useRef(null);
 
   const currentSong = songs[currentIndex];
 
-  function handlePlayPause() {
-    setIsPlaying((prev) => !prev);
-  }
+  // -------------------------
+  // Load Songs
+  // -------------------------
 
-  function handleNext() {
-    setCurrentIndex((prev) => (prev + 1) % songs.length);
-  }
+  useEffect(() => {
+    async function loadSongs() {
+      try {
+        const response = await fetch("/api/songs");
 
-  function handlePrevious() {
-    setCurrentIndex((prev) =>
-      prev === 0 ? songs.length - 1 : prev - 1
-    );
-  }
-  function handleSelectSong(index) {
-    setCurrentIndex(index);
-  }
+        if (!response.ok) {
+          throw new Error("Couldn't load songs.");
+        }
+
+        const data = await response.json();
+
+        setSongs(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadSongs();
+  }, []);
+
+  // -------------------------
+  // Play / Pause
+  // -------------------------
+
   useEffect(() => {
     if (!audioRef.current) return;
 
@@ -41,31 +61,173 @@ export default function MusicPlayer() {
     }
   }, [isPlaying]);
 
+  // -------------------------
+  // Song Changed
+  // -------------------------
+
   useEffect(() => {
-    if (!audioRef.current) return;
+    if (!audioRef.current || !currentSong) return;
 
     audioRef.current.load();
+
     setCurrentTime(0);
 
     if (isPlaying) {
       audioRef.current.play().catch(() => {});
-    }0
+    }
   }, [currentSong, isPlaying]);
+
+  // -------------------------
+  // Controls
+  // -------------------------
+
+  function handlePlayPause() {
+    setIsPlaying((prev) => !prev);
+  }
+
+  function handleNext() {
+    if (songs.length === 0) return;
+
+    setCurrentIndex((prev) => (prev + 1) % songs.length);
+  }
+
+  function handlePrevious() {
+    if (songs.length === 0) return;
+
+    setCurrentIndex((prev) =>
+      prev === 0 ? songs.length - 1 : prev - 1
+    );
+  }
+
+  function handleSelectSong(index) {
+    setCurrentIndex(index);
+  }
+
   function handleSeek(e) {
-  const value = Number(e.target.value);
+    if (!audioRef.current) return;
+
+    const value = Number(e.target.value);
+
     audioRef.current.currentTime = value;
     setCurrentTime(value);
   }
-  function formatTime(time) {
-  if (!time || Number.isNaN(time)) {
-    return "0:00";
-  }
-  const minutes = Math.floor(time / 60);
-  const seconds = Math.floor(time % 60);
 
-  return `${minutes}:${seconds.toString().padStart(2, "0")}`;}
+  // -------------------------
+  // Helpers
+  // -------------------------
+
+  function formatTime(time) {
+    if (!time || Number.isNaN(time)) {
+      return "0:00";
+    }
+
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  }
+
+  // -------------------------
+  // Loading
+  // -------------------------
+
+  if (loading) {
+    return (
+      <div
+        className="
+          flex
+          min-h-[500px]
+          items-center
+          justify-center
+          rounded-3xl
+          border
+          border-white/10
+          bg-white/5
+          backdrop-blur-xl
+        "
+      >
+        <div className="space-y-4 text-center">
+          <div
+            className="
+              mx-auto
+              h-10
+              w-10
+              animate-spin
+              rounded-full
+              border-2
+              border-blue-500
+              border-t-transparent
+            "
+          />
+
+          <p className="text-zinc-300">
+            Loading your playlist...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // -------------------------
+  // Error
+  // -------------------------
+
+  if (error) {
+    return (
+      <div
+        className="
+          rounded-3xl
+          border
+          border-red-500/30
+          bg-red-500/10
+          p-8
+          text-center
+        "
+      >
+        <h2 className="text-lg font-semibold text-red-300">
+          Couldn't load your playlist
+        </h2>
+
+        <p className="mt-2 text-zinc-400">
+          {error}
+        </p>
+      </div>
+    );
+  }
+
+  // -------------------------
+  // No Songs
+  // -------------------------
+
+  if (!currentSong) {
+    return (
+      <div
+        className="
+          rounded-3xl
+          border
+          border-white/10
+          bg-white/5
+          p-8
+          text-center
+        "
+      >
+        <h2 className="text-xl font-semibold">
+          No songs found
+        </h2>
+
+        <p className="mt-2 text-zinc-400">
+          Add some MP3 files to public/songs.
+        </p>
+      </div>
+    );
+  }
+
+  // -------------------------
+  // UI
+  // -------------------------
+
   return (
-        <section
+    <section
       className="
         w-full
         max-w-md
@@ -83,12 +245,16 @@ export default function MusicPlayer() {
         ref={audioRef}
         src={currentSong.audio}
         onEnded={handleNext}
-        onLoadedMetadata={() =>
-          setDuration(audioRef.current.duration)
-        }
-        onTimeUpdate={() =>
-          setCurrentTime(audioRef.current.currentTime)
-        }
+        onLoadedMetadata={() => {
+          if (!audioRef.current) return;
+
+          setDuration(audioRef.current.duration);
+        }}
+        onTimeUpdate={() => {
+          if (!audioRef.current) return;
+
+          setCurrentTime(audioRef.current.currentTime);
+        }}
       />
 
       <AlbumCover
@@ -165,14 +331,14 @@ export default function MusicPlayer() {
         <div
           className="
             max-h-60
-            space-y-2
             overflow-y-auto
+            space-y-2
             pr-1
           "
         >
           {songs.map((song, index) => (
             <button
-              key={song.title}
+              key={song.id}
               type="button"
               onClick={() => handleSelectSong(index)}
               className={`
@@ -215,7 +381,7 @@ export default function MusicPlayer() {
               </div>
 
               {currentIndex === index && (
-                <span className="text-blue-400">
+                <span className="text-blue-400 text-lg">
                   {isPlaying ? "♫" : "▶"}
                 </span>
               )}
