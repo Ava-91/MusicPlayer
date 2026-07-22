@@ -17,58 +17,98 @@
   },
   {
     "id": 3,
-    "title": "BITTERSUITE(slowed & reverb)",
+    "title": "BLUE(slowed & reverb)",
     "artist": "Billie Eilish",
-    "cover": "/covers/bittersuite.jpg",
-    "audio": "/songs/bittersuite.mp3",
-    "duration": "5:50"
+    "cover": "/covers/blue.jpg",
+    "audio": "/songs/blue.mp3",
+    "duration": "6:38"
   },
     {
     "id": 4,
-    "title": "BITTERSUITE(slowed & reverb)",
+    "title": "CHIHIRO(slowed & reverb)",
     "artist": "Billie Eilish",
-    "cover": "/covers/bittersuite.jpg",
-    "audio": "/songs/bittersuite.mp3",
+    "cover": "/covers/chihiro.jpg",
+    "audio": "/songs/chihiro.mp3",
     "duration": "5:50"
   },
     {
     "id": 5,
-    "title": "BITTERSUITE(slowed & reverb)",
+    "title": "EVERYBODY DIES(slowed & reverb)",
     "artist": "Billie Eilish",
-    "cover": "/covers/bittersuite.jpg",
-    "audio": "/songs/bittersuite.mp3",
+    "cover": "/covers/everybody-dies.jpg",
+    "audio": "/songs/everybody-dies.mp3",
     "duration": "5:50"
   },
     {
     "id": 6,
-    "title": "BITTERSUITE(slowed & reverb)",
+    "title": "EVERYTHING I WANTED(slowed & reverb)",
     "artist": "Billie Eilish",
-    "cover": "/covers/bittersuite.jpg",
-    "audio": "/songs/bittersuite.mp3",
+    "cover": "/covers/everything-i-wanted.jpg",
+    "audio": "/songs/everything-i-wanted.mp3",
     "duration": "5:50"
   },
     {
     "id": 7,
-    "title": "BITTERSUITE(slowed & reverb)",
+    "title": "GETTING OLDER(slowed & reverb)",
     "artist": "Billie Eilish",
-    "cover": "/covers/bittersuite.jpg",
-    "audio": "/songs/bittersuite.mp3",
+    "cover": "/covers/getting-older.jpeg",
+    "audio": "/songs/getting-older.mp3",
     "duration": "5:50"
   },
     {
     "id": 8,
-    "title": "BITTERSUITE(slowed & reverb)",
+    "title": "HALLEY'S COMET(slowed & reverb)",
     "artist": "Billie Eilish",
-    "cover": "/covers/bittersuite.jpg",
-    "audio": "/songs/bittersuite.mp3",
+    "cover": "/covers/halley's-comet.jpeg",
+    "audio": "/songs/halley's-comet.mp3",
     "duration": "5:50"
   },
     {
     "id": 9,
-    "title": "BITTERSUITE(slowed & reverb)",
+    "title": "OVERHEATED(slowed & reverb)",
     "artist": "Billie Eilish",
-    "cover": "/covers/bittersuite.jpg",
-    "audio": "/songs/bittersuite.mp3",
+    "cover": "/covers/overheated.jpg",
+    "audio": "/songs/overheated.mp3",
+    "duration": "5:50"
+  },
+  {
+    "id": 10,
+    "title": "OXYTOCIN(slowed & reverb)",
+    "artist": "Billie Eilish",
+    "cover": "/covers/oxytocin.jpg",
+    "audio": "/songs/oxytocin.mp3",
+    "duration": "5:50"
+  },
+  {
+    "id": 11,
+    "title": "THE GREATEST(slowed & reverb)",
+    "artist": "Billie Eilish",
+    "cover": "/covers/the-greatest.jpg",
+    "audio": "/songs/the-greatest.mp3",
+    "duration": "5:50"
+  },
+  {
+    "id": 12,
+    "title": "THEREFORE I AM(slowed & reverb)",
+    "artist": "Billie Eilish",
+    "cover": "/covers/therefore-i-am.jpg",
+    "audio": "/songs/therefore-i-am.mp3",
+    "duration": "5:50"
+  },
+  {
+    "id": 13,
+    "title": "WHAT WAS I MADE FOR?(slowed & reverb)",
+    "artist": "Billie Eilish",
+    "cover": "/covers/what-was-i-made-for.jpeg",
+    "audio": "/songs/what-was-i-made-for.mp3",
+    "duration": "5:50"
+  },
+  {
+    "id": 14,
+    "title": "WILDLFLOWER(slowed & reverb)",
+    "artist": "Billie Eilish",
+    "cover": "/covers/wildflower.jpeg",
+    "audio": "/songs/wildflower.mp3",
     "duration": "5:50"
   }
 ]
