@@ -39,3 +39,19 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Demo / local music files
+/public/songs/birds-of-a-feather.mp3
+/public/songs/bittersuite.mp3
+/public/songs/blue.mp3
+/public/songs/chihiro.mp3
+/public/songs/everybody-dies.mp3
+/public/songs/everything-i-wanted.m4a
+/public/songs/getting-older.mp3
+/public/songs/halley's-comet.mp3
+/public/songs/overheated.mp3
+/public/songs/oxytocin.mp3
+/public/songs/the-greatest.mp3
+/public/songs/therefore-i-am.mp3
+/public/songs/what-was-i-made-for.mp3
+/public/songs/wildflower.mp3

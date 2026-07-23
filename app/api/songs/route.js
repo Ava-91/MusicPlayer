@@ -12,7 +12,9 @@ export async function GET() {
   const files = fs
     .readdirSync(songsFolder)
     .filter((file) =>
-      file.toLowerCase().endsWith(".mp3")
+      file.endsWith(".mp3") ||
+      file.endsWith(".ogg") ||
+      file.endsWith(".m4a")
     );
 
   const songs = await Promise.all(
@@ -48,7 +50,7 @@ export async function GET() {
 
           title:
             common.title ||
-            file.replace(".mp3", ""),
+            file.replace(/\.(mp3|ogg|m4a)$/i, ""),
 
           artist:
             common.artist ||

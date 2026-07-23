@@ -8,15 +8,15 @@ Designed with cozy dark aesthetics, smooth animations, and emotionally unstable 
 
 ## ✨ Features
 
-- 🎵 Automatic music discovery
-- 📝 Reads MP3 metadata
-- 🎤 Shows artist and song information
-- 💿 Extracts embedded album covers
+- 🎵 Automatic music folder scanning
+- 📝 MP3 metadata extraction
+- 🎤 Artist, album, and song information
+- 💿 Embedded album artwork support
 - ⏯️ Play / Pause controls
 - ⏭️ Next and previous songs
-- 🎚️ Seek through songs
-- 🌙 Dark cinematic UI
-- ⚡ Built with modern React patterns
+- 🎚️ Interactive seek bar
+- 🌙 Dark cinematic interface
+- ⚡ Modern React component architecture
 
 ---
 
@@ -56,7 +56,7 @@ No manual JSON editing required.
 
 ## 🎧 Supported Metadata
 
-The player reads:
+The player can read:
 
 - Title
 - Artist
@@ -69,7 +69,7 @@ The player reads:
 
 ## 🚧 Roadmap
 
-### Current
+### Completed
 
 ✅ Music playback  
 ✅ Playlist system  
@@ -85,7 +85,7 @@ The player reads:
 ⬜ Repeat mode  
 ⬜ Lyrics support  
 ⬜ Audio visualizer  
-⬜ Desktop app version with Electron  
+⬜ Desktop version with Electron  
 
 ---
 
