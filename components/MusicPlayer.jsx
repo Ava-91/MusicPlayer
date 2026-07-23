@@ -12,7 +12,7 @@ export default function MusicPlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
 
   const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
+  const duration = currentSong?.duration || 0;
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -245,15 +245,11 @@ export default function MusicPlayer() {
         ref={audioRef}
         src={currentSong.audio}
         onEnded={handleNext}
-        onLoadedMetadata={() => {
-          if (!audioRef.current) return;
-
-          setDuration(audioRef.current.duration);
-        }}
         onTimeUpdate={() => {
           if (!audioRef.current) return;
-
-          setCurrentTime(audioRef.current.currentTime);
+          setCurrentTime(
+            audioRef.current.currentTime
+          );
         }}
       />
 
