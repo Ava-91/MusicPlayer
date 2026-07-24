@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 
 import AlbumCover from "./AlbumCover";
 import Controls from "./Controls";
-import { supabase } from "@/lib/supabase";
 
 export default function MusicPlayer() {
   const [songs, setSongs] = useState([]);
@@ -22,32 +21,35 @@ export default function MusicPlayer() {
 
   const currentSong = songs[currentIndex];
 
-  // =========================
-  // Load songs from Supabase
-  // =========================
+  // ===========================================
+  // Load playlist
+  // ===========================================
 
   useEffect(() => {
     async function loadSongs() {
-      const { data, error } = await supabase
-        .from("songs")
-        .select("*")
-        .order("id");
+      try {
+        const response = await fetch("/api/songs");
 
-      if (error) {
-        setError(error.message);
-      } else {
-        setSongs(data || []);
+        if (!response.ok) {
+          throw new Error("Couldn't load songs.");
+        }
+
+        const data = await response.json();
+
+        setSongs(data);
+      } catch (err) {
+        setError(err.message || "Unknown error");
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
     }
 
     loadSongs();
   }, []);
 
-  // =========================
+  // ===========================================
   // Play / Pause
-  // =========================
+  // ===========================================
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -63,9 +65,9 @@ export default function MusicPlayer() {
     }
   }, [isPlaying]);
 
-  // =========================
+  // ===========================================
   // Song Changed
-  // =========================
+  // ===========================================
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -84,9 +86,9 @@ export default function MusicPlayer() {
     }
   }, [currentSong]);
 
-  // =========================
+  // ===========================================
   // Controls
-  // =========================
+  // ===========================================
 
   function handlePlayPause() {
     setIsPlaying((prev) => !prev);
@@ -122,12 +124,14 @@ export default function MusicPlayer() {
     setCurrentTime(value);
   }
 
-  // =========================
+  // ===========================================
   // Helpers
-  // =========================
+  // ===========================================
 
   function formatTime(seconds) {
-    if (!seconds || Number.isNaN(seconds)) return "0:00";
+    if (!seconds || Number.isNaN(seconds)) {
+      return "0:00";
+    }
 
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
@@ -135,24 +139,27 @@ export default function MusicPlayer() {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   }
 
-  // =========================
+  // ===========================================
   // Loading
-  // =========================
+  // ===========================================
 
   if (loading) {
     return (
       <div className="flex min-h-[500px] items-center justify-center rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl">
         <div className="space-y-4 text-center">
           <div className="mx-auto h-10 w-10 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
-          <p className="text-zinc-300">Loading playlist...</p>
+
+          <p className="text-zinc-300">
+            Loading your playlist...
+          </p>
         </div>
       </div>
     );
   }
 
-  // =========================
+  // ===========================================
   // Error
-  // =========================
+  // ===========================================
 
   if (error) {
     return (
@@ -161,30 +168,34 @@ export default function MusicPlayer() {
           Couldn't load playlist
         </h2>
 
-        <p className="mt-2 text-zinc-400">{error}</p>
-      </div>
-    );
-  }
-
-  // =========================
-  // No songs
-  // =========================
-
-  if (!currentSong) {
-    return (
-      <div className="rounded-3xl border border-white/10 bg-white/5 p-8 text-center">
-        <h2 className="text-xl font-semibold">No songs found</h2>
-
         <p className="mt-2 text-zinc-400">
-          Upload some songs to Supabase.
+          {error}
         </p>
       </div>
     );
   }
 
-  // =========================
+  // ===========================================
+  // Empty Playlist
+  // ===========================================
+
+  if (!currentSong) {
+    return (
+      <div className="rounded-3xl border border-white/10 bg-white/5 p-8 text-center">
+        <h2 className="text-xl font-semibold">
+          No songs found
+        </h2>
+
+        <p className="mt-2 text-zinc-400">
+          Add songs to <code>public/songs</code> and update <code>songs.json</code>.
+        </p>
+      </div>
+    );
+  }
+
+  // ===========================================
   // UI
-  // =========================
+  // ===========================================
 
   return (
     <section className="w-full max-w-md space-y-8 rounded-3xl border border-white/10 bg-white/5 p-8 shadow-2xl backdrop-blur-xl">
@@ -192,6 +203,7 @@ export default function MusicPlayer() {
       <audio
         ref={audioRef}
         src={currentSong.audio}
+        preload="metadata"
         onLoadedMetadata={() => {
           if (audioRef.current) {
             setDuration(audioRef.current.duration);
@@ -225,7 +237,7 @@ export default function MusicPlayer() {
 
         <input
           type="range"
-          min="0"
+          min={0}
           max={duration}
           value={currentTime}
           onChange={handleSeek}
@@ -234,6 +246,7 @@ export default function MusicPlayer() {
 
         <div className="flex justify-between text-xs text-zinc-400">
           <span>{formatTime(currentTime)}</span>
+
           <span>{formatTime(duration)}</span>
         </div>
 
@@ -255,6 +268,7 @@ export default function MusicPlayer() {
         <div className="max-h-60 space-y-2 overflow-y-auto pr-1">
 
           {songs.map((song, index) => (
+
             <button
               key={song.id}
               type="button"
@@ -265,6 +279,7 @@ export default function MusicPlayer() {
                   : "border-white/10 bg-white/5 hover:bg-white/10"
               }`}
             >
+
               <img
                 src={song.cover}
                 alt={song.title}
@@ -272,6 +287,7 @@ export default function MusicPlayer() {
               />
 
               <div className="min-w-0 flex-1">
+
                 <p className="truncate font-medium">
                   {song.title}
                 </p>
@@ -279,6 +295,7 @@ export default function MusicPlayer() {
                 <p className="truncate text-sm text-zinc-400">
                   {song.artist}
                 </p>
+
               </div>
 
               {currentIndex === index && (
@@ -286,7 +303,9 @@ export default function MusicPlayer() {
                   {isPlaying ? "♫" : "▶"}
                 </span>
               )}
+
             </button>
+
           ))}
 
         </div>
