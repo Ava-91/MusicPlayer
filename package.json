@@ -9,6 +9,8 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.110.8",
+    "fast-average-color": "^9.5.2",
+    "framer-motion": "^12.42.2",
     "music-metadata": "^11.14.0",
     "next": "16.2.10",
     "react": "19.2.4",

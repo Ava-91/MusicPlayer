@@ -2,6 +2,54 @@ import fs from "fs";
 import path from "path";
 import { parseFile } from "music-metadata";
 
+const SUPPORTED_EXTENSIONS = [
+  ".mp3",
+  ".m4a",
+  ".wav",
+  ".flac",
+  ".ogg",
+  ".opus",
+];
+
+const DEFAULT_COVER = "/covers/default.jpg";
+
+function removeExtension(filename) {
+  return filename.replace(/\.[^/.]+$/, "");
+}
+
+function titleFromFilename(filename) {
+  return removeExtension(filename)
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function findLocalCover(filename) {
+  const coversFolder = path.join(
+    process.cwd(),
+    "public",
+    "covers"
+  );
+
+  const name = removeExtension(filename);
+
+  const possible = [
+    `${name}.jpg`,
+    `${name}.jpeg`,
+    `${name}.png`,
+    `${name}.webp`,
+    `${name}.avif`,
+  ];
+
+  for (const cover of possible) {
+    if (fs.existsSync(path.join(coversFolder, cover))) {
+      return `/covers/${cover}`;
+    }
+  }
+
+  return DEFAULT_COVER;
+}
+
 export async function GET() {
   const songsFolder = path.join(
     process.cwd(),
@@ -9,12 +57,20 @@ export async function GET() {
     "songs"
   );
 
+  if (!fs.existsSync(songsFolder)) {
+    return Response.json([]);
+  }
+
   const files = fs
     .readdirSync(songsFolder)
-    .filter((file) =>
-      file.endsWith(".mp3") ||
-      file.endsWith(".ogg") ||
-      file.endsWith(".m4a")
+    .filter((file) => {
+      const ext = path.extname(file).toLowerCase();
+      return SUPPORTED_EXTENSIONS.includes(ext);
+    })
+    .sort((a, b) =>
+      titleFromFilename(a).localeCompare(
+        titleFromFilename(b)
+      )
     );
 
   const songs = await Promise.all(
@@ -24,19 +80,27 @@ export async function GET() {
         file
       );
 
+      const fallbackTitle =
+        titleFromFilename(file);
+
+      const fallbackCover =
+        findLocalCover(file);
+
       try {
-        const metadata = await parseFile(filePath);
+        const metadata =
+          await parseFile(filePath);
 
         const common = metadata.common;
         const format = metadata.format;
 
-        let cover = "/covers/default.jpg";
+        let cover = fallbackCover;
 
         if (
           common.picture &&
           common.picture.length > 0
         ) {
-          const picture = common.picture[0];
+          const picture =
+            common.picture[0];
 
           const base64 = Buffer.from(
             picture.data
@@ -50,7 +114,7 @@ export async function GET() {
 
           title:
             common.title ||
-            file.replace(/\.(mp3|ogg|m4a)$/i, ""),
+            fallbackTitle,
 
           artist:
             common.artist ||
@@ -61,42 +125,36 @@ export async function GET() {
             "Unknown Album",
 
           year:
-            common.year ||
-            null,
+            common.year ?? null,
 
           duration:
-            format.duration || 0,
+            format.duration ?? 0,
 
-          audio:
-            `/songs/${file}`,
+          audio: `/songs/${file}`,
 
           cover,
         };
-      } catch (error) {
+      } catch (err) {
         console.log(
-          "Metadata error:",
-          file
+          `Couldn't read metadata from ${file}`
         );
 
         return {
           id: index + 1,
 
-          title:
-            file.replace(".mp3", ""),
+          title: fallbackTitle,
 
-          artist:
-            "Unknown Artist",
+          artist: "Unknown Artist",
 
-          album:
-            "Unknown Album",
+          album: "Unknown Album",
+
+          year: null,
 
           duration: 0,
 
-          audio:
-            `/songs/${file}`,
+          audio: `/songs/${file}`,
 
-          cover:
-            "/covers/default.jpg",
+          cover: fallbackCover,
         };
       }
     })
