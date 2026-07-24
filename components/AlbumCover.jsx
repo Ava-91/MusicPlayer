@@ -7,10 +7,16 @@ export default function AlbumCover({
   title,
   isPlaying,
 }) {
+  const imageSrc =
+    cover && cover.length > 0
+      ? cover
+      : "/covers/default.jpg";
+
   return (
     <div className="relative mx-auto h-72 w-72">
 
       {/* Vinyl */}
+
       <div
         className={`
           absolute
@@ -24,7 +30,6 @@ export default function AlbumCover({
           bg-[radial-gradient(circle,#444_0%,#111_55%,#000_100%)]
           transition-all
           duration-500
-
           ${
             isPlaying
               ? "animate-[spin_8s_linear_infinite]"
@@ -32,52 +37,17 @@ export default function AlbumCover({
           }
         `}
       >
-        <div
-          className="
-            absolute
-            left-1/2
-            top-1/2
-            h-5
-            w-5
-            -translate-x-1/2
-            -translate-y-1/2
-            rounded-full
-            bg-zinc-300
-        "
-        />
+        <div className="absolute left-1/2 top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-zinc-300" />
 
-        <div
-          className="
-            absolute
-            inset-5
-            rounded-full
-            border
-            border-white/5
-        "
-        />
+        <div className="absolute inset-5 rounded-full border border-white/5" />
 
-        <div
-          className="
-            absolute
-            inset-10
-            rounded-full
-            border
-            border-white/5
-        "
-        />
+        <div className="absolute inset-10 rounded-full border border-white/5" />
 
-        <div
-          className="
-            absolute
-            inset-16
-            rounded-full
-            border
-            border-white/5
-        "
-        />
+        <div className="absolute inset-16 rounded-full border border-white/5" />
       </div>
 
-      {/* Album Cover */}
+      {/* Cover */}
+
       <div
         className="
           absolute
@@ -91,10 +61,11 @@ export default function AlbumCover({
         "
       >
         <Image
-          src={cover}
+          src={imageSrc}
           alt={title}
           fill
           priority
+          sizes="288px"
           className="
             object-cover
             transition-transform
