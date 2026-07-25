@@ -40,8 +40,8 @@ export default function BackgroundGlow({
             absolute
             left-1/2
             top-1/2
-            h-[520px]
-            w-[520px]
+            h-520px
+            w-520px
             -translate-x-1/2
             -translate-y-1/2
             rounded-full
@@ -93,8 +93,8 @@ export default function BackgroundGlow({
           className="
             absolute
             inset-0
-            bg-gradient-to-br
-            from-white/[0.05]
+            bg-loinear-to-br
+            from-white/0.05
             via-transparent
             to-black/30
             backdrop-blur-[90px]

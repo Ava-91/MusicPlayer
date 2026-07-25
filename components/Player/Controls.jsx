@@ -181,7 +181,7 @@ export default function Controls({
 
           rounded-full
 
-          bg-gradient-to-br
+          bg-linear-to-br
           from-blue-500
           via-blue-600
           to-indigo-700
@@ -197,7 +197,7 @@ export default function Controls({
             absolute
             inset-0
 
-            bg-gradient-to-br
+            bg-linear-to-br
 
             from-white/25
 
@@ -231,7 +231,7 @@ export default function Controls({
           ) : (
             <IoPlay
               size={34}
-              className="translate-x-[2px]"
+              className="translate-x-0.5"
             />
           )}
         </motion.div>

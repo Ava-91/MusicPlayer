@@ -111,8 +111,8 @@ export default function AlbumCover({
             absolute
             left-1/2
             top-1/2
-            h-[270px]
-            w-[270px]
+            h-67.5
+            w-67.5
             -translate-x-1/2
             -translate-y-1/2
             rounded-full
@@ -172,7 +172,7 @@ export default function AlbumCover({
               -translate-x-1/2
               -translate-y-1/2
               rounded-full
-              bg-gradient-to-br
+              bg-linear-to-br
               from-zinc-300
               to-zinc-700
               shadow-inner
@@ -257,7 +257,7 @@ export default function AlbumCover({
               pointer-events-none
               absolute
               inset-0
-              bg-gradient-to-br
+              bg-linear-to-br
               from-white/18
               via-transparent
               to-transparent
@@ -270,7 +270,7 @@ export default function AlbumCover({
             className="
               absolute
               inset-0
-              bg-gradient-to-t
+              bg-linear-to-t
               from-black/45
               via-transparent
               to-transparent

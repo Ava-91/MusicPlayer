@@ -1,250 +1,126 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import PlaylistItem from "./PlaylistItem";
+import { memo } from "react";
+import { Heart, Play, Pause } from "lucide-react";
+
+// Memoized PlaylistItem to prevent unnecessary re-renders
+const PlaylistItem = memo(({ 
+  song, 
+  index, 
+  isActive, 
+  isPlaying, 
+  isFavorite, 
+  onSelect, 
+  onToggleFavorite 
+}) => {
+  return (
+    <div
+      onClick={() => onSelect(index)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onSelect(index);
+        }
+      }}
+      className={`
+        group
+        flex
+        cursor-pointer
+        items-center
+        gap-4
+        rounded-xl
+        p-3
+        transition-all
+        duration-200
+        hover:bg-white/5
+        ${isActive ? 'bg-white/10' : ''}
+      `}
+    >
+      {/* Play/Pause Icon */}
+      <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg">
+        {isActive && isPlaying ? (
+          <div className="flex h-full w-full items-center justify-center bg-blue-500/20">
+            <Pause size={20} className="text-blue-400" />
+          </div>
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-zinc-800">
+            {isActive ? (
+              <Play size={20} className="text-blue-400" />
+            ) : (
+              <span className="text-sm text-zinc-500">{index + 1}</span>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Song Info */}
+      <div className="flex-1 min-w-0">
+        <h3 className={`
+          truncate text-sm font-medium
+          ${isActive ? 'text-blue-400' : 'text-white'}
+        `}>
+          {song.title}
+        </h3>
+        <p className="truncate text-xs text-zinc-400">{song.artist}</p>
+      </div>
+
+      {/* Favorite Button */}
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggleFavorite(song.id);
+        }}
+        className="
+          p-2
+          text-zinc-500
+          transition-colors
+          hover:text-red-400
+        "
+      >
+        <Heart
+          size={18}
+          className={isFavorite ? 'fill-red-400 text-red-400' : ''}
+        />
+      </button>
+    </div>
+  );
+});
+
+PlaylistItem.displayName = 'PlaylistItem';
 
 export default function Playlist({
   songs,
-  currentIndex,
+  currentSongId,
   isPlaying,
-  search = "",
+  favorites = [],
   onSelectSong,
+  onToggleFavorite,
 }) {
-  const activeSongRef = useRef(null);
-
-  // ===========================================
-  // Filter songs
-  // ===========================================
-
-  const filteredSongs = useMemo(() => {
-    if (!search.trim()) {
-      return songs;
-    }
-
-    const query = search.toLowerCase();
-
-    return songs.filter((song) =>
-      `${song.title} ${song.artist} ${song.album}`
-        .toLowerCase()
-        .includes(query)
-    );
-  }, [songs, search]);
-
-  // ===========================================
-  // Scroll active song into view
-  // ===========================================
-
-  useEffect(() => {
-    if (!activeSongRef.current) return;
-
-    activeSongRef.current.scrollIntoView({
-      behavior: "smooth",
-      block: "nearest",
-    });
-  }, [currentIndex]);
-
-  // ===========================================
-  // Empty Search
-  // ===========================================
-
-  if (filteredSongs.length === 0) {
-    return (
-      <div className="flex h-full flex-col">
-
-        <div
-          className="
-            sticky
-            top-0
-            z-10
-
-            mb-4
-
-            border-b
-            border-white/10
-
-            bg-black/40
-            backdrop-blur-xl
-
-            pb-4
-          "
-        >
-          <h2
-            className="
-              text-xl
-              font-bold
-            "
-          >
-            Playlist
-          </h2>
-
-          <p className="text-sm text-zinc-400">
-            0 results
-          </p>
-        </div>
-
-        <div
-          className="
-            flex
-            flex-1
-            items-center
-            justify-center
-            text-center
-          "
-        >
-          <div className="space-y-2">
-
-            <p className="text-lg font-semibold">
-              Nothing found
-            </p>
-
-            <p className="text-zinc-500">
-              Try another search.
-            </p>
-
-          </div>
-        </div>
-
-      </div>
-    );
-  }
-
-  // ===========================================
-  // UI
-  // ===========================================
+  // Convert favorites to Set for O(1) lookups
+  const favoriteSet = new Set(favorites);
 
   return (
-    <div className="flex h-full flex-col">
-
-      {/* Header */}
-
-      <div
-        className="
-          sticky
-          top-0
-          z-20
-
-          mb-5
-
-          border-b
-          border-white/10
-
-          bg-black/40
-          backdrop-blur-xl
-
-          pb-4
-        "
-      >
-        <div className="flex items-end justify-between">
-
-          <div>
-
-            <h2
-              className="
-                text-2xl
-                font-bold
-              "
-            >
-              Playlist
-            </h2>
-
-            <p
-              className="
-                mt-1
-                text-sm
-                text-zinc-400
-              "
-            >
-              {filteredSongs.length} songs
-            </p>
-
-          </div>
-
-          <span
-            className="
-              rounded-full
-              border
-              border-white/10
-
-              bg-white/5
-
-              px-3
-              py-1
-
-              text-xs
-              text-zinc-400
-            "
-          >
-            Local Library
-          </span>
-
+    <div className="space-y-1">
+      {songs.length === 0 ? (
+        <div className="py-12 text-center text-zinc-500">
+          <p className="text-sm">No songs found</p>
         </div>
-      </div>
-
-      {/* Songs */}
-
-      <motion.div
-        layout
-        className="
-          flex-1
-          space-y-2
-          overflow-y-auto
-          pr-2
-
-          scrollbar-thin
-          scrollbar-thumb-white/10
-        "
-      >
-        <AnimatePresence initial={false}>
-
-          {filteredSongs.map((song) => {
-            const originalIndex = songs.findIndex(
-              (s) => s.audio === song.audio
-            );
-
-            const active =
-              originalIndex === currentIndex;
-
-            return (
-              <motion.div
-                key={song.audio}
-                layout
-                initial={{
-                  opacity: 0,
-                  y: 15,
-                }}
-                animate={{
-                  opacity: 1,
-                  y: 0,
-                }}
-                exit={{
-                  opacity: 0,
-                  y: -15,
-                }}
-                transition={{
-                  duration: 0.2,
-                }}
-                ref={
-                  active
-                    ? activeSongRef
-                    : null
-                }
-              >
-                <PlaylistItem
-                  song={song}
-                  active={active}
-                  isPlaying={isPlaying}
-                  onClick={() =>
-                    onSelectSong(originalIndex)
-                  }
-                />
-              </motion.div>
-            );
-          })}
-
-        </AnimatePresence>
-      </motion.div>
-
+      ) : (
+        songs.map((song, index) => (
+          <PlaylistItem
+            key={song.id}
+            song={song}
+            index={index}
+            isActive={song.id === currentSongId}
+            isPlaying={isPlaying}
+            isFavorite={favoriteSet.has(song.id)}
+            onSelect={onSelectSong}
+            onToggleFavorite={onToggleFavorite}
+          />
+        ))
+      )}
     </div>
   );
 }

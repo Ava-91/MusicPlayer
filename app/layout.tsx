@@ -23,8 +23,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geist.className} bg-zinc-950 text-white min-h-screen antialiased`}
-      >
+        className={`${geist.className} bg-zinc-950 text-white h-screen overflow-hidden antialiased`}>
         {children}
       </body>
     </html>

@@ -29,7 +29,7 @@ export default function VolumeSlider({
         rounded-2xl
         border
         border-white/10
-        bg-white/[0.04]
+        bg-white/4
         px-4
         py-3
         backdrop-blur-xl
@@ -81,7 +81,7 @@ export default function VolumeSlider({
             h-1.5
             -translate-y-1/2
             rounded-full
-            bg-gradient-to-r
+            bg-linear-to-r
             from-sky-400
             via-blue-500
             to-cyan-400

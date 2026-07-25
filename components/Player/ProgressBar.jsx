@@ -52,7 +52,6 @@ export default function ProgressBar({
 
       <div
         ref={barRef}
-        onClick={handleClick}
         className="
           group
           relative
@@ -74,7 +73,7 @@ export default function ProgressBar({
 
             rounded-full
 
-            bg-gradient-to-r
+            bg-linear-to-r
             from-sky-400
             via-cyan-400
             to-blue-500
