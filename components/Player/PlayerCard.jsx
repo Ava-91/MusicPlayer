@@ -19,6 +19,7 @@ export default function PlayerCard({
   volume,
   search,
   favorites,
+  shuffle,
 
   onPlayPause,
   onNext,
@@ -29,6 +30,7 @@ export default function PlayerCard({
   onSearchChange,
   onSearchClear,
   onToggleFavorite,
+  onShuffle,
 }) {
   // Guard against missing song (Error 1)
   if (!currentSong) {
@@ -126,9 +128,11 @@ export default function PlayerCard({
         <div className="space-y-5">
           <Controls
             isPlaying={isPlaying}
+            shuffle={shuffle}
             onPlayPause={onPlayPause}
             onPrevious={onPrevious}
             onNext={onNext}
+            onShuffle={onShuffle}
           />
 
           <VolumeSlider

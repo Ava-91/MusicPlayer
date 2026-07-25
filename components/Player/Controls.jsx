@@ -8,13 +8,16 @@ import {
   IoPause,
   IoPlaySkipBack,
   IoPlaySkipForward,
+  IoShuffle,
 } from "react-icons/io5";
 
 export default function Controls({
   isPlaying,
+  shuffle,
   onPlayPause,
   onPrevious,
   onNext,
+  onShuffle,
 }) {
   // ==========================
   // Keyboard Shortcuts
@@ -94,6 +97,48 @@ export default function Controls({
 
   return (
     <div className="flex items-center justify-center gap-7">
+
+      {/* Shuffle Button */}
+
+      <motion.button
+        whileHover={{
+          scale: 1.08,
+          y: -2,
+        }}
+        whileTap={{
+          scale: 0.92,
+        }}
+        type="button"
+        aria-label="Shuffle"
+        onClick={onShuffle}
+        className={`
+          group
+          relative
+          flex
+          h-14
+          w-14
+          items-center
+          justify-center
+          rounded-full
+          border
+          border-white/10
+          bg-white/5
+          backdrop-blur-xl
+          shadow-lg
+          transition-colors
+          hover:bg-white/10
+          ${shuffle ? 'text-blue-400 border-blue-400/30 bg-blue-500/10' : 'text-zinc-400'}
+        `}
+      >
+        <IoShuffle
+          size={22}
+          className={`
+            transition-transform
+            duration-300
+            ${shuffle ? 'rotate-90' : 'group-hover:rotate-90'}
+          `}
+        />
+      </motion.button>
 
       {/* Previous */}
 
@@ -196,13 +241,9 @@ export default function Controls({
           className="
             absolute
             inset-0
-
             bg-linear-to-br
-
             from-white/25
-
             via-transparent
-
             to-transparent
           "
         />
