@@ -110,3 +110,15 @@ img {
   }
 
 }
+@keyframes equalizer {
+
+  0%,
+  100% {
+    transform: scaleY(.4);
+  }
+
+  50% {
+    transform: scaleY(1);
+  }
+
+}

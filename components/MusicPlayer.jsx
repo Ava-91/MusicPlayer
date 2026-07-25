@@ -1,317 +1,51 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useAudio } from "./hooks/useAudio";
+import { useKeyboard } from "./hooks/useKeyboard";
 
-import AlbumCover from "./AlbumCover";
-import Controls from "./Controls";
+import PlayerCard from "./Player/PlayerCard";
+import LoadingState from "./Player/LoadingState";
+import ErrorState from "./Player/ErrorState";
+import EmptyState from "./Player/EmptyState";
 
 export default function MusicPlayer() {
-  const [songs, setSongs] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const player = useAudio();
 
-  const [isPlaying, setIsPlaying] = useState(false);
+  useKeyboard({
+    isPlaying: player.isPlaying,
+    onPlayPause: player.togglePlay,
+    onNext: player.nextSong,
+    onPrevious: player.previousSong,
+  });
 
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  const audioRef = useRef(null);
-
-  const currentSong = songs[currentIndex];
-
-  // ===========================================
-  // Load playlist
-  // ===========================================
-
-  useEffect(() => {
-    async function loadSongs() {
-      try {
-        const response = await fetch("/api/songs");
-
-        if (!response.ok) {
-          throw new Error("Couldn't load songs.");
-        }
-
-        const data = await response.json();
-
-        setSongs(data);
-      } catch (err) {
-        setError(err.message || "Unknown error");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadSongs();
-  }, []);
-
-  // ===========================================
-  // Play / Pause
-  // ===========================================
-
-  useEffect(() => {
-    const audio = audioRef.current;
-
-    if (!audio) return;
-
-    if (isPlaying) {
-      audio.play().catch(() => {
-        setIsPlaying(false);
-      });
-    } else {
-      audio.pause();
-    }
-  }, [isPlaying]);
-
-  // ===========================================
-  // Song Changed
-  // ===========================================
-
-  useEffect(() => {
-    const audio = audioRef.current;
-
-    if (!audio || !currentSong) return;
-
-    audio.load();
-
-    setCurrentTime(0);
-    setDuration(0);
-
-    if (isPlaying) {
-      audio.play().catch(() => {
-        setIsPlaying(false);
-      });
-    }
-  }, [currentSong]);
-
-  // ===========================================
-  // Controls
-  // ===========================================
-
-  function handlePlayPause() {
-    setIsPlaying((prev) => !prev);
+  if (player.loading) {
+    return <LoadingState />;
   }
 
-  function handleNext() {
-    if (!songs.length) return;
-
-    setCurrentIndex((prev) => (prev + 1) % songs.length);
+  if (player.error) {
+    return <ErrorState message={player.error} />;
   }
 
-  function handlePrevious() {
-    if (!songs.length) return;
-
-    setCurrentIndex((prev) =>
-      prev === 0 ? songs.length - 1 : prev - 1
-    );
+  if (!player.currentSong) {
+    return <EmptyState />;
   }
-
-  function handleSelectSong(index) {
-    setCurrentIndex(index);
-    setIsPlaying(true);
-  }
-
-  function handleSeek(e) {
-    const audio = audioRef.current;
-
-    if (!audio) return;
-
-    const value = Number(e.target.value);
-
-    audio.currentTime = value;
-    setCurrentTime(value);
-  }
-
-  // ===========================================
-  // Helpers
-  // ===========================================
-
-  function formatTime(seconds) {
-    if (!seconds || Number.isNaN(seconds)) {
-      return "0:00";
-    }
-
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  }
-
-  // ===========================================
-  // Loading
-  // ===========================================
-
-  if (loading) {
-    return (
-      <div className="flex min-h-[500px] items-center justify-center rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl">
-        <div className="space-y-4 text-center">
-          <div className="mx-auto h-10 w-10 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
-
-          <p className="text-zinc-300">
-            Loading your playlist...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // ===========================================
-  // Error
-  // ===========================================
-
-  if (error) {
-    return (
-      <div className="rounded-3xl border border-red-500/30 bg-red-500/10 p-8 text-center">
-        <h2 className="text-xl font-semibold text-red-300">
-          Couldn't load playlist
-        </h2>
-
-        <p className="mt-2 text-zinc-400">
-          {error}
-        </p>
-      </div>
-    );
-  }
-
-  // ===========================================
-  // Empty Playlist
-  // ===========================================
-
-  if (!currentSong) {
-    return (
-      <div className="rounded-3xl border border-white/10 bg-white/5 p-8 text-center">
-        <h2 className="text-xl font-semibold">
-          No songs found
-        </h2>
-
-        <p className="mt-2 text-zinc-400">
-          Add songs to <code>public/songs</code> and update <code>songs.json</code>.
-        </p>
-      </div>
-    );
-  }
-
-  // ===========================================
-  // UI
-  // ===========================================
 
   return (
-    <section className="w-full max-w-md space-y-8 rounded-3xl border border-white/10 bg-white/5 p-8 shadow-2xl backdrop-blur-xl">
-
-      <audio
-        ref={audioRef}
-        src={currentSong.audio}
-        preload="metadata"
-        onLoadedMetadata={() => {
-          if (audioRef.current) {
-            setDuration(audioRef.current.duration);
-          }
-        }}
-        onTimeUpdate={() => {
-          if (audioRef.current) {
-            setCurrentTime(audioRef.current.currentTime);
-          }
-        }}
-        onEnded={handleNext}
-      />
-
-      <AlbumCover
-        cover={currentSong.cover}
-        title={currentSong.title}
-        isPlaying={isPlaying}
-      />
-
-      <div className="text-center">
-        <h1 className="text-3xl font-bold">
-          {currentSong.title}
-        </h1>
-
-        <p className="mt-2 text-zinc-400">
-          {currentSong.artist}
-        </p>
-      </div>
-
-      <div className="space-y-2">
-
-        <input
-          type="range"
-          min={0}
-          max={duration}
-          value={currentTime}
-          onChange={handleSeek}
-          className="w-full cursor-pointer accent-blue-500"
-        />
-
-        <div className="flex justify-between text-xs text-zinc-400">
-          <span>{formatTime(currentTime)}</span>
-
-          <span>{formatTime(duration)}</span>
-        </div>
-
-      </div>
-
-      <Controls
-        isPlaying={isPlaying}
-        onPlayPause={handlePlayPause}
-        onPrevious={handlePrevious}
-        onNext={handleNext}
-      />
-
-      <div className="space-y-3 border-t border-white/10 pt-6">
-
-        <h2 className="text-sm font-semibold uppercase tracking-widest text-zinc-400">
-          Playlist
-        </h2>
-
-        <div className="max-h-60 space-y-2 overflow-y-auto pr-1">
-
-          {songs.map((song, index) => (
-
-            <button
-              key={song.id}
-              type="button"
-              onClick={() => handleSelectSong(index)}
-              className={`flex w-full items-center gap-4 rounded-2xl border p-3 text-left transition-all ${
-                currentIndex === index
-                  ? "border-blue-500 bg-blue-500/20"
-                  : "border-white/10 bg-white/5 hover:bg-white/10"
-              }`}
-            >
-
-              <img
-                src={song.cover}
-                alt={song.title}
-                className="h-14 w-14 rounded-xl object-cover"
-              />
-
-              <div className="min-w-0 flex-1">
-
-                <p className="truncate font-medium">
-                  {song.title}
-                </p>
-
-                <p className="truncate text-sm text-zinc-400">
-                  {song.artist}
-                </p>
-
-              </div>
-
-              {currentIndex === index && (
-                <span className="text-lg text-blue-400">
-                  {isPlaying ? "♫" : "▶"}
-                </span>
-              )}
-
-            </button>
-
-          ))}
-
-        </div>
-
-      </div>
-
-    </section>
+    <PlayerCard
+      songs={player.songs}
+      currentSong={player.currentSong}
+      currentIndex={player.currentIndex}
+      isPlaying={player.isPlaying}
+      currentTime={player.currentTime}
+      duration={player.duration}
+      volume={player.volume}
+      audioRef={player.audioRef}
+      onPlayPause={player.togglePlay}
+      onNext={player.nextSong}
+      onPrevious={player.previousSong}
+      onSeek={player.seek}
+      onVolume={player.setVolume}
+      onSelectSong={player.selectSong}
+    />
   );
 }
