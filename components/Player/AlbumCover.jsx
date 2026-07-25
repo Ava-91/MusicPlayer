@@ -13,7 +13,6 @@ export default function AlbumCover({
 }) {
   const [image, setImage] = useState(cover || DEFAULT_COVER);
   const [loaded, setLoaded] = useState(false);
-
   const [bgColor, setBgColor] = useState("rgb(40,40,40)");
 
   // ===========================
@@ -59,10 +58,10 @@ export default function AlbumCover({
   }, [cover]);
 
   return (
-    <div className="relative mx-auto h-80 w-80">
+    // Main container - overflow visible so glows can extend
+    <div className="relative mx-auto h-80 w-80 overflow-visible">
 
-      {/* Dynamic ambient glow */}
-
+      {/* Dynamic ambient glow - outside the clipping */}
       <div
         className="absolute inset-0 scale-125 rounded-full blur-[95px] transition-all duration-700"
         style={{
@@ -71,8 +70,7 @@ export default function AlbumCover({
         }}
       />
 
-      {/* Secondary glow */}
-
+      {/* Secondary glow - outside the clipping */}
       <div
         className="absolute inset-8 rounded-full blur-[70px] transition-all duration-700"
         style={{
@@ -81,8 +79,7 @@ export default function AlbumCover({
         }}
       />
 
-      {/* Billie glow */}
-
+      {/* Billie glow - outside the clipping */}
       <div
         className="
           absolute
@@ -94,8 +91,7 @@ export default function AlbumCover({
         "
       />
 
-      {/* Floating */}
-
+      {/* Floating container */}
       <div
         className="
           absolute
@@ -105,7 +101,6 @@ export default function AlbumCover({
       >
 
         {/* Vinyl */}
-
         <div
           className={`
             absolute
@@ -133,7 +128,6 @@ export default function AlbumCover({
         >
 
           {/* Grooves */}
-
           {Array.from({ length: 18 }).map((_, i) => (
             <div
               key={i}
@@ -145,7 +139,6 @@ export default function AlbumCover({
           ))}
 
           {/* Reflection */}
-
           <div
             className="
               absolute
@@ -161,7 +154,6 @@ export default function AlbumCover({
           />
 
           {/* Center */}
-
           <div
             className="
               absolute
@@ -195,22 +187,17 @@ export default function AlbumCover({
 
         </div>
 
-        {/* Album */}
-
+        {/* Album Cover Container - this is where clipping happens */}
         <div
           className="
             absolute
             inset-0
             overflow-hidden
             rounded-[30px]
-
             border
             border-white/10
-
             bg-zinc-900
-
             shadow-[0_25px_80px_rgba(0,0,0,.65)]
-
             backdrop-blur-xl
           "
         >
@@ -251,7 +238,6 @@ export default function AlbumCover({
           />
 
           {/* Glass */}
-
           <div
             className="
               pointer-events-none
@@ -265,7 +251,6 @@ export default function AlbumCover({
           />
 
           {/* Bottom fade */}
-
           <div
             className="
               absolute
@@ -278,7 +263,6 @@ export default function AlbumCover({
           />
 
           {/* Colored overlay */}
-
           <div
             className="absolute inset-0 transition-all duration-700"
             style={{

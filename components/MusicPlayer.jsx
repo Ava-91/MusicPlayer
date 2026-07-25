@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import usePlaylist from "./hooks/usePlaylist";
 import useAudio from "./hooks/useAudio";
 import useKeyboard from "./hooks/useKeyboard";
@@ -26,10 +27,27 @@ export default function MusicPlayer() {
     onSeekBackward: player.seekBackward,
   });
 
+  // Fix: When filtered playlist changes, ensure current song still exists
+  useEffect(() => {
+    if (!playlist.filteredSongs.length) return;
+
+    // Check if current song exists in filtered playlist
+    const currentExists = playlist.filteredSongs.some(
+      song => song.id === player.currentSong?.id
+    );
+
+    // If current song doesn't exist in filtered list, select the first one
+    if (!currentExists) {
+      player.selectSong(0);
+    }
+  }, [playlist.filteredSongs, player.currentSong?.id]);
+
+  // Loading state
   if (playlist.loading) {
     return <LoadingState />;
   }
 
+  // Error state
   if (playlist.error) {
     return (
       <ErrorState
@@ -38,7 +56,8 @@ export default function MusicPlayer() {
     );
   }
 
-  if (!playlist.filteredSongs.length) {
+  // Only show EmptyState when there are NO songs loaded at all
+  if (!playlist.songs.length) {
     return <EmptyState />;
   }
 
@@ -49,6 +68,7 @@ export default function MusicPlayer() {
       favorites={playlist.favorites}
       sortBy={playlist.sortBy}
       currentSong={player.currentSong}
+      currentSongId={player.currentSong?.id}
       currentIndex={player.currentIndex}
       isPlaying={player.isPlaying}
       currentTime={player.currentTime}

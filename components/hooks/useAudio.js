@@ -14,7 +14,21 @@ export default function useAudio(playlist = [], initialIndex = 0) {
   const [shuffle, setShuffle] = useState(false);
   const [buffered, setBuffered] = useState(0);
   const [loadingSong, setLoadingSong] = useState(false);
+  
   const currentSong = playlist[currentIndex] || null;
+  
+  // Keep reference to last valid song
+  const lastSongRef = useRef(null);
+
+  // Update lastSongRef whenever we have a valid song
+  useEffect(() => {
+    if (currentSong) {
+      lastSongRef.current = currentSong;
+    }
+  }, [currentSong]);
+
+  // Use displaySong that falls back to last valid song
+  const displaySong = currentSong || lastSongRef.current;
 
   // Create Audio Element
   useEffect(() => {
@@ -33,11 +47,11 @@ export default function useAudio(playlist = [], initialIndex = 0) {
   // Load Song
   useEffect(() => {
     const audio = audioRef.current;
-    if (!audio || !currentSong) return;
+    if (!audio || !displaySong) return;
     
     setLoadingSong(true);
     audio.pause();
-    audio.src = currentSong.audio;
+    audio.src = displaySong.audio;
     audio.load();
     setCurrentTime(0);
     setDuration(0);
@@ -53,7 +67,7 @@ export default function useAudio(playlist = [], initialIndex = 0) {
     const handleError = () => {
       setLoadingSong(false);
       setIsPlaying(false);
-      console.error("Error loading audio:", currentSong.audio);
+      console.error("Error loading audio:", displaySong.audio);
     };
 
     audio.addEventListener("loadedmetadata", handleLoaded);
@@ -63,7 +77,7 @@ export default function useAudio(playlist = [], initialIndex = 0) {
       audio.removeEventListener("loadedmetadata", handleLoaded);
       audio.removeEventListener("error", handleError);
     };
-  }, [currentSong]);
+  }, [displaySong]);
 
   // Play/Pause
   useEffect(() => {
@@ -163,7 +177,7 @@ export default function useAudio(playlist = [], initialIndex = 0) {
 
   // Controls
   const play = () => {
-    if (!currentSong) return;
+    if (!displaySong) return;
     setIsPlaying(true);
   };
 
@@ -282,7 +296,7 @@ export default function useAudio(playlist = [], initialIndex = 0) {
 
   return {
     audioRef,
-    currentSong,
+    currentSong: displaySong, // Return displaySong instead of currentSong
     currentIndex,
     currentTime,
     duration,
