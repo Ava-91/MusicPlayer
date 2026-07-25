@@ -1,8 +1,8 @@
 # 🎧 MusicPlayer
 
-A cinematic music player built with **Next.js**, **React**, and **Tailwind CSS**.
+A modern music player built with **Next.js**, **React**, and **Tailwind CSS**.
 
-Designed with cozy dark aesthetics, smooth animations, and emotionally unstable teenage developer energy 🎀
+Designed with a cinematic dark interface, smooth animations, automatic metadata extraction, and a clean component-based architecture.
 
 ---
 
@@ -10,95 +10,142 @@ Designed with cozy dark aesthetics, smooth animations, and emotionally unstable 
 
 - 🎵 Automatic music folder scanning
 - 📝 MP3 metadata extraction
-- 🎤 Artist, album, and song information
-- 💿 Embedded album artwork support
-- ⏯️ Play / Pause controls
-- ⏭️ Next and previous songs
-- 🎚️ Interactive seek bar
-- 🌙 Dark cinematic interface
-- ⚡ Modern React component architecture
+- 🎤 Song, artist and album information
+- 🖼️ Embedded album artwork support
+- ▶️ Play / Pause
+- ⏮️ Previous / Next track
+- ⏱️ Live progress bar with seeking
+- 🔊 Volume control
+- ❤️ Favorite songs
+- 🔎 Real-time search
+- 📂 Automatic playlist generation
+- 💾 Persistent favorites
+- 💿 Automatic duration detection
+- ✨ Smooth Framer Motion animations
+- 🌙 Responsive glassmorphism UI
 
 ---
 
 ## 🛠️ Tech Stack
 
 <p>
-
 <img src="https://skillicons.dev/icons?i=nextjs,react,tailwind,js,nodejs,git,github,vscode"/>
-
 </p>
 
+### Libraries
+
+- Next.js 16
+- React 19
+- Tailwind CSS 4
+- Framer Motion
+- Lucide React
+- music-metadata
+- Node.js
+
 ---
 
-## 📂 How it works
+## 📂 Project Structure
 
-Music files are placed inside:
-<code>
+```
 public/
 └── songs/
-├── song.mp3
-└── another-song.mp3
-</code>
+├── song1.mp3
+├── song2.mp3
+└── ...
+```
 
-The app automatically:
-<code>
-MP3 files
-↓
-music-metadata
-↓
-Song information
-↓
-React player</code>
+The application automatically scans the `public/songs` folder and extracts metadata from every supported audio file.
 
-No manual JSON editing required.
+No playlist JSON is required.
 
 ---
 
-## 🎧 Supported Metadata
+## 🎵 Supported Metadata
 
-The player can read:
+The player automatically reads:
 
 - Title
 - Artist
 - Album
-- Year
 - Duration
-- Embedded album artwork
+- Embedded cover artwork
 
 ---
 
-## 🚧 Roadmap
+## 🚀 Installation
 
-### Completed
+Clone the repository
 
-✅ Music playback  
-✅ Playlist system  
-✅ Metadata reading  
-✅ Album covers  
+```bash
+git clone https://github.com/YOUR_USERNAME/musicplayer.git
+cd musicplayer
+````
 
+Install dependencies
 
-### Planned
+```bash
+npm install
+```
 
-⬜ Search songs  
-⬜ Favorites  
-⬜ Shuffle mode  
-⬜ Repeat mode  
-⬜ Lyrics support  
-⬜ Audio visualizer  
-⬜ Desktop version with Electron  
+Create a folder for your music
+
+```
+public/
+└── songs/
+```
+
+Copy your `.mp3` files into the `public/songs` folder.
+
+Start the development server
+
+```bash
+npm run dev
+```
+
+Open
+
+```
+http://localhost:3000
+```
+
+---
+
+## 🚧 Current Features
+
+* ✅ Music playback
+* ✅ Automatic playlist generation
+* ✅ Search
+* ✅ Favorites
+* ✅ Volume control
+* ✅ Album artwork
+* ✅ Metadata extraction
+* ✅ Animated UI
+* ✅ Responsive layout
+
+---
+
+## 📋 Planned Features
+
+* ⬜ Shuffle mode
+* ⬜ Repeat mode
+* ⬜ Playback speed
+* ⬜ Mute button
+* ⬜ Keyboard shortcuts improvements
+* ⬜ Lyrics support
+* ⬜ Audio visualizer
+* ⬜ Queue management
+* ⬜ Electron desktop version
 
 ---
 
 ## 💙 Why I made this
 
-I wanted to understand how real music applications work instead of only making tutorial projects.
-
-This started as a simple React experiment and slowly became a tiny Spotify-inspired player.
+I wanted to build a real music player instead of another tutorial project. This project helped me learn about media APIs, metadata extraction, reusable React hooks, component architecture, and building polished interfaces with Next.js.
 
 ---
 
-## 🎀 Developer note
+## 🎀 Developer
 
-Built by Ava:
+Built by **Ava** ✨
 
-> turning bugs into features and CSS suffering into pretty interfaces since 2026 ✨
+> Turning bugs into features and CSS suffering into pretty interfaces.
