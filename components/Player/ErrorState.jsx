@@ -70,14 +70,12 @@ export default function ErrorState({
             </li>
           </ul>
         </div>
-
         <button
           type="button"
           onClick={onRetry}
           className="mt-10 flex items-center gap-3 rounded-2xl bg-linear-to-r from-red-500 to-red-600 px-7 py-4 font-semibold text-white shadow-[0_15px_40px_rgba(239,68,68,.35)] transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_20px_50px_rgba(239,68,68,.45)] active:scale-95"
         >
           <RefreshCw size={20} />
-
           Try Again
         </button>
       </div>
