@@ -77,7 +77,7 @@ The player automatically reads:
 Clone the repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/musicplayer.git
+git clone https://github.com/Ava-91/MusicPlayer
 cd musicplayer
 ````
 
