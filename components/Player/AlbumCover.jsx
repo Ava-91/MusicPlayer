@@ -11,18 +11,8 @@ export default function AlbumCover({
   title,
   isPlaying,
 }) {
-  const [image, setImage] = useState(cover || DEFAULT_COVER);
   const [loaded, setLoaded] = useState(false);
   const [bgColor, setBgColor] = useState("rgb(40,40,40)");
-
-  // ===========================
-  // Song changed
-  // ===========================
-
-  useEffect(() => {
-    setImage(cover || DEFAULT_COVER);
-    setLoaded(false);
-  }, [cover]);
 
   // ===========================
   // Extract average color
@@ -214,15 +204,15 @@ export default function AlbumCover({
           )}
 
           <Image
-            key={image}
-            src={image}
+            key={cover || DEFAULT_COVER}
+            src={cover || DEFAULT_COVER}
             alt={title}
             fill
             priority
             sizes="320px"
             onLoad={() => setLoaded(true)}
             onError={() => {
-              setImage(DEFAULT_COVER);
+              setLoaded(false);
             }}
             className={`
               object-cover

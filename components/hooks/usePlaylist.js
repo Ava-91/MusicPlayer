@@ -8,7 +8,15 @@ export default function usePlaylist() {
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("title");
-  const [favorites, setFavorites] = useState([]);
+  const [favorites, setFavorites] = useState(() => {
+    if (typeof window === "undefined") return [];
+    const saved = localStorage.getItem("favorites");
+    try {
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
 
   // Load Playlist
   useEffect(() => {
@@ -30,16 +38,7 @@ export default function usePlaylist() {
     loadSongs();
   }, []);
 
-  // Favorites
-  useEffect(() => {
-    const saved = localStorage.getItem("favorites");
-    if (saved) {
-      try {
-        setFavorites(JSON.parse(saved));
-      } catch {}
-    }
-  }, []);
-
+  // Persist favorites
   useEffect(() => {
     localStorage.setItem("favorites", JSON.stringify(favorites));
   }, [favorites]);

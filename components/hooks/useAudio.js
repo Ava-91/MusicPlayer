@@ -7,28 +7,31 @@ export default function useAudio(playlist = [], initialIndex = 0) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(1);
+  const [volume, setVolume] = useState(() => {
+    if (typeof window === "undefined") return 1;
+    const saved = localStorage.getItem("volume");
+    return saved ? Number(saved) : 1;
+  });
   const [muted, setMuted] = useState(false);
-  const [playbackRate, setPlaybackRate] = useState(1);
-  const [repeatMode, setRepeatMode] = useState("off");
-  const [shuffle, setShuffle] = useState(false);
+  const [playbackRate, setPlaybackRate] = useState(() => {
+    if (typeof window === "undefined") return 1;
+    const saved = localStorage.getItem("speed");
+    return saved ? Number(saved) : 1;
+  });
+  const [repeatMode, setRepeatMode] = useState(() => {
+    if (typeof window === "undefined") return "off";
+    const saved = localStorage.getItem("repeat");
+    return saved || "off";
+  });
+  const [shuffle, setShuffle] = useState(() => {
+    if (typeof window === "undefined") return false;
+    const saved = localStorage.getItem("shuffle");
+    return saved === "true";
+  });
   const [buffered, setBuffered] = useState(0);
   const [loadingSong, setLoadingSong] = useState(false);
   
   const currentSong = playlist[currentIndex] || null;
-  
-  // Keep reference to last valid song
-  const lastSongRef = useRef(null);
-
-  // Update lastSongRef whenever we have a valid song
-  useEffect(() => {
-    if (currentSong) {
-      lastSongRef.current = currentSong;
-    }
-  }, [currentSong]);
-
-  // Use displaySong that falls back to last valid song
-  const displaySong = currentSong || lastSongRef.current;
 
   // Create Audio Element
   useEffect(() => {
@@ -47,11 +50,11 @@ export default function useAudio(playlist = [], initialIndex = 0) {
   // Load Song
   useEffect(() => {
     const audio = audioRef.current;
-    if (!audio || !displaySong) return;
+    if (!audio || !currentSong) return;
     
     setLoadingSong(true);
     audio.pause();
-    audio.src = displaySong.audio;
+    audio.src = currentSong.audio;
     audio.load();
     setCurrentTime(0);
     setDuration(0);
@@ -67,7 +70,7 @@ export default function useAudio(playlist = [], initialIndex = 0) {
     const handleError = () => {
       setLoadingSong(false);
       setIsPlaying(false);
-      console.error("Error loading audio:", displaySong.audio);
+      console.error("Error loading audio:", currentSong.audio);
     };
 
     audio.addEventListener("loadedmetadata", handleLoaded);
@@ -77,7 +80,7 @@ export default function useAudio(playlist = [], initialIndex = 0) {
       audio.removeEventListener("loadedmetadata", handleLoaded);
       audio.removeEventListener("error", handleError);
     };
-  }, [displaySong]);
+  }, [currentSong]);
 
   // Play/Pause
   useEffect(() => {
@@ -136,37 +139,15 @@ export default function useAudio(playlist = [], initialIndex = 0) {
 
   // Persist volume
   useEffect(() => {
-    const saved = localStorage.getItem("volume");
-    if (saved !== null) {
-      setVolume(Number(saved));
-    }
-  }, []);
-
-  useEffect(() => {
     localStorage.setItem("volume", volume);
   }, [volume]);
 
   // Persist playback speed
   useEffect(() => {
-    const saved = localStorage.getItem("speed");
-    if (saved) {
-      setPlaybackRate(Number(saved));
-    }
-  }, []);
-
-  useEffect(() => {
     localStorage.setItem("speed", playbackRate);
   }, [playbackRate]);
 
   // Persist repeat & shuffle
-  useEffect(() => {
-    const repeat = localStorage.getItem("repeat");
-    const shuffleSaved = localStorage.getItem("shuffle");
-
-    if (repeat) setRepeatMode(repeat);
-    if (shuffleSaved) setShuffle(shuffleSaved === "true");
-  }, []);
-
   useEffect(() => {
     localStorage.setItem("repeat", repeatMode);
   }, [repeatMode]);
@@ -177,7 +158,7 @@ export default function useAudio(playlist = [], initialIndex = 0) {
 
   // Controls
   const play = () => {
-    if (!displaySong) return;
+    if (!currentSong) return;
     setIsPlaying(true);
   };
 
@@ -295,8 +276,8 @@ export default function useAudio(playlist = [], initialIndex = 0) {
   }, [repeatMode, shuffle, currentIndex, playlist, nextSong]);
 
   return {
-    audioRef,
-    currentSong: displaySong, // Return displaySong instead of currentSong
+    audioRef: audioRef,
+    currentSong: currentSong,
     currentIndex,
     currentTime,
     duration,
