@@ -19,7 +19,7 @@
     "clsx": "^2.1.1",
     "fast-average-color": "^9.5.2",
     "framer-motion": "^12.42.2",
-    "lucide-react": "^0.540.0",
+    "lucide-react": "^1.27.0",
     "music-metadata": "^11.14.0",
     "next": "^16.2.12",
     "react": "^19.2.4",
