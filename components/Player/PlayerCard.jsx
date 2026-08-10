@@ -19,8 +19,8 @@ export default function PlayerCard({
   volume,
   search,
   favorites,
-  shuffle,
-
+  shuffle, 
+  repeatMode,
   onPlayPause,
   onNext,
   onPrevious,
@@ -31,6 +31,7 @@ export default function PlayerCard({
   onSearchClear,
   onToggleFavorite,
   onShuffle,
+  onRepeat,
 }) {
   // Guard against missing song (Error 1)
   if (!currentSong) {
@@ -41,7 +42,7 @@ export default function PlayerCard({
           mx-auto
           flex
           h-[85vh]
-          min-h-[700px]
+          min-h-175
           w-full
           max-w-7xl
           items-center
@@ -66,7 +67,7 @@ export default function PlayerCard({
         mx-auto
         flex
         h-[85vh]
-        min-h-[700px]
+        min-h-175
         w-full
         max-w-7xl
         gap-8
@@ -85,7 +86,7 @@ export default function PlayerCard({
         layout
         className="
           flex
-          w-[450px]
+          w-112.5
           shrink-0
           flex-col
           justify-between
@@ -129,10 +130,12 @@ export default function PlayerCard({
           <Controls
             isPlaying={isPlaying}
             shuffle={shuffle}
+            repeatMode={repeatMode}
             onPlayPause={onPlayPause}
             onPrevious={onPrevious}
             onNext={onNext}
             onShuffle={onShuffle}
+            onRepeat={onRepeat}
           />
 
           <VolumeSlider

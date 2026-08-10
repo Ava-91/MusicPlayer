@@ -9,15 +9,18 @@ import {
   IoPlaySkipBack,
   IoPlaySkipForward,
   IoShuffle,
+  IoRepeat,
 } from "react-icons/io5";
 
 export default function Controls({
   isPlaying,
   shuffle,
+  repeatMode,
   onPlayPause,
   onPrevious,
   onNext,
   onShuffle,
+  onRepeat,
 }) {
   // ==========================
   // Keyboard Shortcuts
@@ -139,7 +142,80 @@ export default function Controls({
           `}
         />
       </motion.button>
+      {/* Repeat Button */}
 
+      <motion.button
+        whileHover={{
+          scale: 1.08,
+          y: -2,
+        }}
+        whileTap={{
+          scale: 0.92,
+        }}
+        type="button"
+        aria-label={
+          repeatMode === "off"
+            ? "Repeat off"
+            : repeatMode === "all"
+              ? "Repeat all"
+              : "Repeat one"
+        }
+        onClick={onRepeat}
+        className={`
+          group
+          relative
+          flex
+          h-14
+          w-14
+          items-center
+          justify-center
+          rounded-full
+          border
+          border-white/10
+          bg-white/5
+          backdrop-blur-xl
+          shadow-lg
+          transition-colors
+          hover:bg-white/10
+          ${
+            repeatMode !== "off"
+              ? "border-blue-400/30 bg-blue-500/10 text-blue-400"
+              : "text-zinc-400"
+          }
+        `}
+      >
+        <IoRepeat
+          size={22}
+          className="
+            transition-transform
+            duration-300
+            group-hover:scale-110
+          "
+        />
+
+        {repeatMode === "one" && (
+          <span
+            className="
+              absolute
+              right-2
+              top-2
+              flex
+              h-4
+              w-4
+              items-center
+              justify-center
+              rounded-full
+              bg-blue-500
+              text-[10px]
+              font-bold
+              text-white
+            "
+          >
+            1
+          </span>
+        )}
+      </motion.button>
+      
       {/* Previous */}
 
       <motion.button
