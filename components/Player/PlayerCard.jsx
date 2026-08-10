@@ -20,6 +20,8 @@ export default function PlayerCard({
   search,
   favorites,
   shuffle, 
+  muted,
+  onMute,
   repeatMode,
   onPlayPause,
   onNext,
@@ -140,7 +142,9 @@ export default function PlayerCard({
 
           <VolumeSlider
             volume={volume}
+            muted={muted}
             onChange={onVolume}
+            onMute={onMute}
           />
         </div>
       </motion.div>

@@ -274,8 +274,14 @@ export default function useAudio(playlist = [], initialIndex = 0) {
     audio.addEventListener("ended", handleEnded);
     return () => audio.removeEventListener("ended", handleEnded);
   }, [repeatMode, shuffle, currentIndex, playlist, nextSong]);
-
+  const adjustVolume = useCallback((amount) => {
+  setVolume(prev => {
+    const newVolume = Math.max(0, Math.min(100, prev + amount));
+    return newVolume;
+  });
+}, []);
   return {
+    adjustVolume: adjustVolume,
     audioRef: audioRef,
     currentSong: currentSong,
     currentIndex,

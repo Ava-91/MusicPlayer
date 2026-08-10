@@ -8,56 +8,50 @@ import {
 
 export default function VolumeSlider({
   volume,
+  muted,
   onChange,
+  onMute,
 }) {
-  const icon =
-    volume === 0 ? (
-      <VolumeX size={18} />
-    ) : volume < 0.5 ? (
-      <Volume1 size={18} />
-    ) : (
-      <Volume2 size={18} />
-    );
+  const isMuted = muted || volume === 0;
+
+  const icon = isMuted ? (
+    <VolumeX size={20} />
+  ) : volume < 0.5 ? (
+    <Volume1 size={20} />
+  ) : (
+    <Volume2 size={20} />
+  );
 
   return (
-    <div
-      className="
-        group
-        flex
-        items-center
-        gap-3
-        rounded-2xl
-        border
-        border-white/10
-        bg-white/4
-        px-4
-        py-3
-        backdrop-blur-xl
-      "
-    >
+    <div className="flex items-center gap-3">
+      {/* Mute Button */}
       <button
         type="button"
-        aria-label="Volume"
+        onClick={onMute}
+        aria-label={isMuted ? "Unmute" : "Mute"}
+        aria-pressed={isMuted}
         className="
           flex
           h-9
           w-9
+          shrink-0
           items-center
           justify-center
           rounded-full
-          bg-white/5
-          text-zinc-300
+          text-zinc-400
           transition-all
-          duration-300
+          duration-200
           hover:bg-white/10
           hover:text-white
+          active:scale-95
         "
       >
         {icon}
       </button>
 
+      {/* Volume Slider */}
       <div className="relative flex-1">
-        {/* background */}
+        {/* Background */}
         <div
           className="
             absolute
@@ -71,7 +65,7 @@ export default function VolumeSlider({
           "
         />
 
-        {/* active fill */}
+        {/* Active Fill */}
         <div
           className="
             pointer-events-none
@@ -100,9 +94,7 @@ export default function VolumeSlider({
           max={1}
           step={0.01}
           value={volume}
-          onChange={(e) =>
-            onChange(Number(e.target.value))
-          }
+          onChange={(e) => onChange(Number(e.target.value))}
           aria-label="Volume slider"
           className="
             relative
@@ -122,8 +114,7 @@ export default function VolumeSlider({
             [&::-webkit-slider-thumb]:shadow-[0_0_12px_rgba(255,255,255,.6)]
             [&::-webkit-slider-thumb]:transition-all
             [&::-webkit-slider-thumb]:duration-200
-
-            group-hover:[&::-webkit-slider-thumb]:scale-110
+            [&::-webkit-slider-thumb]:hover:scale-110
 
             [&::-moz-range-track]:bg-transparent
             [&::-moz-range-thumb]:border-0
@@ -135,6 +126,7 @@ export default function VolumeSlider({
         />
       </div>
 
+      {/* Volume Percentage */}
       <span
         className="
           w-10
