@@ -9,12 +9,14 @@ export default function useKeyboard({
   seekForward,
   seekBackward,
   toggleMute,
+  adjustVolume,
+  cycleRepeat,
+  toggleShuffle,
 }) {
   useEffect(() => {
     function handleKeyDown(e) {
       // Ignore shortcuts while typing
-      const tag =
-        document.activeElement?.tagName;
+      const tag = document.activeElement?.tagName;
 
       if (
         tag === "INPUT" ||
@@ -25,11 +27,13 @@ export default function useKeyboard({
       }
 
       switch (e.code) {
+        // Play / Pause
         case "Space":
           e.preventDefault();
           togglePlay?.();
           break;
 
+        // Seek / Navigation
         case "ArrowRight":
           e.preventDefault();
 
@@ -52,8 +56,33 @@ export default function useKeyboard({
 
           break;
 
+        // Volume
+        case "ArrowUp":
+          e.preventDefault();
+          adjustVolume?.(0.05);
+          break;
+
+        case "ArrowDown":
+          e.preventDefault();
+          adjustVolume?.(-0.05);
+          break;
+
+        // Mute
         case "KeyM":
+          e.preventDefault();
           toggleMute?.();
+          break;
+
+        // Repeat
+        case "KeyR":
+          e.preventDefault();
+          cycleRepeat?.();
+          break;
+
+        // Shuffle
+        case "KeyS":
+          e.preventDefault();
+          toggleShuffle?.();
           break;
 
         default:
@@ -61,16 +90,10 @@ export default function useKeyboard({
       }
     }
 
-    window.addEventListener(
-      "keydown",
-      handleKeyDown
-    );
+    window.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      window.removeEventListener(
-        "keydown",
-        handleKeyDown
-      );
+      window.removeEventListener("keydown", handleKeyDown);
     };
   }, [
     togglePlay,
@@ -79,5 +102,8 @@ export default function useKeyboard({
     seekForward,
     seekBackward,
     toggleMute,
+    adjustVolume,
+    cycleRepeat,
+    toggleShuffle,
   ]);
 }

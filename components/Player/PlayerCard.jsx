@@ -1,7 +1,8 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
+import KeyboardShortcutsHelp from "./KeyboardShortcutsHelp";
 import AlbumCover from "./AlbumCover";
 import Controls from "./Controls";
 import ProgressBar from "./ProgressBar";
@@ -19,7 +20,7 @@ export default function PlayerCard({
   volume,
   search,
   favorites,
-  shuffle, 
+  shuffle,
   muted,
   onMute,
   repeatMode,
@@ -35,54 +36,17 @@ export default function PlayerCard({
   onShuffle,
   onRepeat,
 }) {
-  // Guard against missing song (Error 1)
+  // Guard against missing song
   if (!currentSong) {
     return (
-      <section
-        className="
-          relative
-          mx-auto
-          flex
-          h-[85vh]
-          min-h-175
-          w-full
-          max-w-7xl
-          items-center
-          justify-center
-          rounded-[36px]
-          border
-          border-white/10
-          bg-white/5
-          backdrop-blur-3xl
-          shadow-[0_30px_80px_rgba(0,0,0,.55)]
-        "
-      >
-        <p className="text-zinc-400">No matching song found.</p>
-      </section>
+      <div className="flex h-full items-center justify-center text-zinc-400">
+        No matching song found.
+      </div>
     );
   }
 
   return (
-    <section
-      className="
-        relative
-        mx-auto
-        flex
-        h-[85vh]
-        min-h-175
-        w-full
-        max-w-7xl
-        gap-8
-        overflow-visible
-        rounded-[36px]
-        border
-        border-white/10
-        bg-white/5
-        p-8
-        backdrop-blur-3xl
-        shadow-[0_30px_80px_rgba(0,0,0,.55)]
-      "
-    >
+    <section className="flex h-full gap-6">
       {/* Left Player */}
       <motion.div
         layout
@@ -95,38 +59,44 @@ export default function PlayerCard({
           px-6
         "
       >
-        <div className="space-y-6">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentSong.id}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: .35 }}
-            >
-              <AlbumCover
-                cover={currentSong.cover}
-                title={currentSong.title}
-                isPlaying={isPlaying}
-              />
-            </motion.div>
-          </AnimatePresence>
+      <motion.div
+        key={currentSong.id}
+        initial={{
+          opacity: 0,
+          y: 15,
+        }}
+        animate={{
+          opacity: 1,
+          y: 0,
+        }}
+        exit={{
+          opacity: 0,
+          y: -15,
+        }}
+        transition={{
+          duration: 0.35,
+        }}
+      >
+        <AlbumCover
+          cover={currentSong.cover}
+          title={currentSong.title}
+        />
+      </motion.div>
+        <div className="space-y-2 text-center">
+          <h1 className="truncate text-4xl font-bold">
+            {currentSong.title}
+          </h1>
 
-          <div className="space-y-2 text-center">
-            <h1 className="truncate text-4xl font-bold">
-              {currentSong.title}
-            </h1>
-            <p className="truncate text-lg text-zinc-400">
-              {currentSong.artist}
-            </p>
-          </div>
-
-          <ProgressBar
-            currentTime={currentTime}
-            duration={duration}
-            onSeek={onSeek}
-          />
+          <p className="truncate text-lg text-zinc-400">
+            {currentSong.artist}
+          </p>
         </div>
+
+        <ProgressBar
+          currentTime={currentTime}
+          duration={duration}
+          onSeek={onSeek}
+        />
 
         <div className="space-y-5">
           <Controls
@@ -162,13 +132,26 @@ export default function PlayerCard({
           bg-black/20
         "
       >
-        {/* Search Bar - Fixed at top */}
-        <div className="border-b border-white/10 p-6">
-          <SearchBar
-            value={search}
-            onChange={onSearchChange}
-            onClear={onSearchClear}
-          />
+        {/* Search + Keyboard Help */}
+        <div
+          className="
+            flex
+            items-center
+            gap-3
+            border-b
+            border-white/10
+            p-6
+          "
+        >
+          <div className="min-w-0 flex-1">
+            <SearchBar
+              value={search}
+              onChange={onSearchChange}
+              onClear={onSearchClear}
+            />
+          </div>
+
+          <KeyboardShortcutsHelp />
         </div>
 
         {/* Scrollable Playlist */}
@@ -179,7 +162,9 @@ export default function PlayerCard({
             isPlaying={isPlaying}
             favorites={favorites}
             onSelectSong={onSelectSong}
-            onToggleFavorite={onToggleFavorite}
+            onToggleFavorite={
+              onToggleFavorite
+            }
           />
         </div>
       </div>
