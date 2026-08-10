@@ -110,7 +110,7 @@ export async function GET() {
         }
 
         return {
-          id: index + 1,
+          id: file,
 
           title:
             common.title ||
@@ -140,7 +140,7 @@ export async function GET() {
         );
 
         return {
-          id: index + 1,
+          id: file,
 
           title: fallbackTitle,
 
