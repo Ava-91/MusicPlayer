@@ -51,6 +51,10 @@ export default function MusicPlayer() {
       favorites={playlist.favorites}
       sortBy={playlist.sortBy}
 
+      /* =====================================================
+         QUEUE
+      ====================================================== */
+
       queue={queue.queue}
       onAddToQueue={queue.addToQueue}
       onPlayNext={queue.playNext}
@@ -60,9 +64,29 @@ export default function MusicPlayer() {
       onMoveQueueDown={queue.moveDown}
       onClearQueue={queue.clearQueue}
 
+      /* =====================================================
+         RECENTLY PLAYED
+      ====================================================== */
+
+      recentlyPlayed={player.recentlyPlayed}
+      onPlayRecentlyPlayed={
+        player.playRecentlyPlayed
+      }
+      onClearRecentlyPlayed={
+        player.clearRecentlyPlayed
+      }
+
+      /* =====================================================
+         CURRENT SONG
+      ====================================================== */
+
       currentSong={player.currentSong}
       currentSongId={player.currentSong?.id}
       currentIndex={player.currentIndex}
+
+      /* =====================================================
+         PLAYBACK STATE
+      ====================================================== */
 
       isPlaying={player.isPlaying}
       currentTime={player.currentTime}
@@ -71,10 +95,18 @@ export default function MusicPlayer() {
       loadingSong={player.loadingSong}
       audioRef={player.audioRef}
 
+      /* =====================================================
+         VOLUME
+      ====================================================== */
+
       volume={player.volume}
       muted={player.muted}
       onVolume={player.setVolume}
       onMute={player.toggleMute}
+
+      /* =====================================================
+         PLAYBACK MODES
+      ====================================================== */
 
       playbackRate={player.playbackRate}
       repeatMode={player.repeatMode}
@@ -84,22 +116,50 @@ export default function MusicPlayer() {
       onNext={player.nextSong}
       onPrevious={player.previousSong}
 
+      /* =====================================================
+         SEEKING
+      ====================================================== */
+
       onSeek={player.seek}
       onSeekForward={player.seekForward}
       onSeekBackward={player.seekBackward}
 
-      onPlaybackRate={player.togglePlaybackRate}
+      /* =====================================================
+         PLAYBACK CONTROLS
+      ====================================================== */
+
+      onPlaybackRate={
+        player.togglePlaybackRate
+      }
       onRepeat={player.cycleRepeat}
       onShuffle={player.toggleShuffle}
 
+      /* =====================================================
+         SONG SELECTION
+      ====================================================== */
+
       onSelectSong={player.selectSong}
+
+      /* =====================================================
+         SEARCH / SORT
+      ====================================================== */
 
       onSearch={playlist.setSearch}
       onSearchChange={playlist.setSearch}
       onSearchClear={playlist.clearSearch}
       onSort={playlist.setSortBy}
 
-      onToggleFavorite={playlist.toggleFavorite}
+      /* =====================================================
+         FAVORITES
+      ====================================================== */
+
+      onToggleFavorite={
+        playlist.toggleFavorite
+      }
+
+      /* =====================================================
+         PLAYLIST
+      ====================================================== */
 
       onRefresh={playlist.refresh}
     />
