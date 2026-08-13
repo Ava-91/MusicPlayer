@@ -1,12 +1,24 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 const clamp = (value, min, max) =>
   Math.max(min, Math.min(max, value));
 
-const getStoredNumber = (key, fallback, min, max) => {
-  if (typeof window === "undefined") return fallback;
+const getStoredNumber = (
+  key,
+  fallback,
+  min,
+  max
+) => {
+  if (typeof window === "undefined") {
+    return fallback;
+  }
 
   const value = Number(localStorage.getItem(key));
 
@@ -35,7 +47,9 @@ export default function useAudio(
     useState(initialIndex);
 
   const [currentSong, setCurrentSong] =
-    useState(() => playlist[initialIndex] || null);
+    useState(
+      () => playlist[initialIndex] || null
+    );
 
   const [isQueueSong, setIsQueueSong] =
     useState(false);
@@ -63,7 +77,12 @@ export default function useAudio(
 
   const [playbackRate, setPlaybackRate] =
     useState(() =>
-      getStoredNumber("speed", 1, 0.25, 4)
+      getStoredNumber(
+        "speed",
+        1,
+        0.25,
+        4
+      )
     );
 
   const [repeatMode, setRepeatMode] =
@@ -72,6 +91,36 @@ export default function useAudio(
   const [shuffle, setShuffle] = useState(() =>
     getStoredBoolean("shuffle")
   );
+
+  /*
+   * Resolve the song used by the player.
+   *
+   * When the playlist is initially empty, currentSong
+   * is null. Once the API finishes loading the playlist,
+   * the first song becomes available without needing
+   * a setState call inside an effect.
+   */
+  const activeSong =
+    isQueueSong
+      ? currentSong
+      : currentSong ||
+        playlist[initialIndex] ||
+        playlist[0] ||
+        null;
+
+  const activeIndex =
+    isQueueSong
+      ? -1
+      : currentSong
+        ? playlist.findIndex(
+            (song) =>
+              song.id === currentSong.id
+          )
+        : initialIndex < playlist.length
+          ? initialIndex
+          : playlist.length > 0
+            ? 0
+            : -1;
 
   /* Queue helpers */
 
@@ -109,31 +158,17 @@ export default function useAudio(
     audio.playbackRate = playbackRate;
   }, [volume, muted, playbackRate]);
 
-  useEffect(() => {
-    if (!currentSong && playlist.length > 0) {
-      setCurrentIndex(initialIndex);
-      setCurrentSong(playlist[initialIndex] || playlist[0]);
-      setIsQueueSong(false);
-    }
-  }, [
-    playlist,
-    initialIndex,
-    currentSong,
-  ]);
   /* Load current song */
 
   useEffect(() => {
     const audio = audioRef.current;
 
-    if (!audio || !currentSong?.audio) return;
-
-    setLoadingSong(true);
-    setCurrentTime(0);
-    setDuration(0);
-    setBuffered(0);
+    if (!audio || !activeSong?.audio) {
+      return;
+    }
 
     audio.pause();
-    audio.src = currentSong.audio;
+    audio.src = activeSong.audio;
     audio.load();
 
     const handleMetadata = () => {
@@ -158,7 +193,7 @@ export default function useAudio(
 
       console.error(
         "Error loading audio:",
-        currentSong.audio
+        activeSong.audio
       );
     };
 
@@ -167,7 +202,10 @@ export default function useAudio(
       handleMetadata
     );
 
-    audio.addEventListener("error", handleError);
+    audio.addEventListener(
+      "error",
+      handleError
+    );
 
     return () => {
       audio.removeEventListener(
@@ -180,7 +218,7 @@ export default function useAudio(
         handleError
       );
     };
-  }, [currentSong, isPlaying]);
+  }, [activeSong, isPlaying]);
 
   /* Playback */
 
@@ -206,8 +244,9 @@ export default function useAudio(
 
     if (!audio) return;
 
-    const updateTime = () =>
+    const updateTime = () => {
       setCurrentTime(audio.currentTime);
+    };
 
     const updateDuration = () => {
       if (Number.isFinite(audio.duration)) {
@@ -265,7 +304,10 @@ export default function useAudio(
   /* Persist settings */
 
   useEffect(() => {
-    localStorage.setItem("volume", String(volume));
+    localStorage.setItem(
+      "volume",
+      String(volume)
+    );
   }, [volume]);
 
   useEffect(() => {
@@ -276,7 +318,10 @@ export default function useAudio(
   }, [playbackRate]);
 
   useEffect(() => {
-    localStorage.setItem("repeat", repeatMode);
+    localStorage.setItem(
+      "repeat",
+      repeatMode
+    );
   }, [repeatMode]);
 
   useEffect(() => {
@@ -289,18 +334,20 @@ export default function useAudio(
   /* Play / pause */
 
   const play = useCallback(() => {
-    if (currentSong) {
+    if (activeSong) {
       setIsPlaying(true);
     }
-  }, [currentSong]);
+  }, [activeSong]);
 
   const pause = useCallback(() => {
     setIsPlaying(false);
   }, []);
 
   const togglePlay = useCallback(() => {
+    if (!activeSong) return;
+
     setIsPlaying((value) => !value);
-  }, []);
+  }, [activeSong]);
 
   /* Seeking */
 
@@ -342,29 +389,35 @@ export default function useAudio(
 
   /* Volume */
 
-  const changeVolume = useCallback((value) => {
-    const next = clamp(
-      Number(value) || 0,
-      0,
-      1
-    );
+  const changeVolume = useCallback(
+    (value) => {
+      const next = clamp(
+        Number(value) || 0,
+        0,
+        1
+      );
 
-    setVolume(next);
+      setVolume(next);
 
-    if (next > 0) {
-      setMuted(false);
-    }
-  }, []);
+      if (next > 0) {
+        setMuted(false);
+      }
+    },
+    []
+  );
 
-  const adjustVolume = useCallback((amount) => {
-    setVolume((value) =>
-      clamp(value + amount, 0, 1)
-    );
+  const adjustVolume = useCallback(
+    (amount) => {
+      setVolume((value) =>
+        clamp(value + amount, 0, 1)
+      );
 
-    if (amount > 0) {
-      setMuted(false);
-    }
-  }, []);
+      if (amount > 0) {
+        setMuted(false);
+      }
+    },
+    []
+  );
 
   const toggleMute = useCallback(() => {
     setMuted((value) => !value);
@@ -384,19 +437,28 @@ export default function useAudio(
     setShuffle((value) => !value);
   }, []);
 
-  const togglePlaybackRate = useCallback(() => {
-    const speeds = [1, 1.25, 1.5, 2];
-
-    setPlaybackRate((current) => {
-      const index = speeds.indexOf(current);
-
-      return speeds[
-        index === -1
-          ? 0
-          : (index + 1) % speeds.length
+  const togglePlaybackRate = useCallback(
+    () => {
+      const speeds = [
+        1,
+        1.25,
+        1.5,
+        2,
       ];
-    });
-  }, []);
+
+      setPlaybackRate((current) => {
+        const index =
+          speeds.indexOf(current);
+
+        return speeds[
+          index === -1
+            ? 0
+            : (index + 1) % speeds.length
+        ];
+      });
+    },
+    []
+  );
 
   /* Song selection */
 
@@ -409,6 +471,11 @@ export default function useAudio(
         return;
       }
 
+      setLoadingSong(true);
+      setCurrentTime(0);
+      setDuration(0);
+      setBuffered(0);
+
       setCurrentIndex(index);
       setCurrentSong(playlist[index]);
       setIsQueueSong(false);
@@ -417,41 +484,54 @@ export default function useAudio(
     [playlist]
   );
 
-  const playQueueSong = useCallback((song) => {
-    if (!song) return;
+  const playQueueSong = useCallback(
+    (song) => {
+      if (!song) return;
 
-    setCurrentIndex(-1);
-    setCurrentSong(song);
-    setIsQueueSong(true);
-    setIsPlaying(true);
-  }, []);
+      setLoadingSong(true);
+      setCurrentTime(0);
+      setDuration(0);
+      setBuffered(0);
+
+      setCurrentIndex(-1);
+      setCurrentSong(song);
+      setIsQueueSong(true);
+      setIsPlaying(true);
+    },
+    []
+  );
 
   /* Random song */
 
   const getRandomIndex = useCallback(() => {
-    if (playlist.length <= 1) return 0;
+    if (playlist.length <= 1) {
+      return 0;
+    }
 
     let index;
 
     do {
       index = Math.floor(
-        Math.random() * playlist.length
+        Math.random() *
+          playlist.length
       );
-    } while (index === currentIndex);
+    } while (index === activeIndex);
 
     return index;
-  }, [currentIndex, playlist.length]);
+  }, [activeIndex, playlist.length]);
 
   /* Next */
 
   const nextSong = useCallback(() => {
-    const currentQueue = Array.isArray(
-      queueApi?.queue
-    )
-      ? queueApi.queue
-      : [];
+    const currentQueue =
+      Array.isArray(queueApi?.queue)
+        ? queueApi.queue
+        : [];
 
-    if (!playlist.length && !currentQueue.length) {
+    if (
+      !playlist.length &&
+      !currentQueue.length
+    ) {
       setIsPlaying(false);
       return;
     }
@@ -459,7 +539,8 @@ export default function useAudio(
     /* Queue always has priority. */
 
     if (currentQueue.length) {
-      const next = currentQueue[0];
+      const next =
+        currentQueue[0];
 
       removeQueueSong(0);
       playQueueSong(next);
@@ -470,12 +551,24 @@ export default function useAudio(
     /* Queue finished → return to library. */
 
     if (isQueueSong) {
+      if (!playlist.length) {
+        setIsPlaying(false);
+        return;
+      }
+
       const index = shuffle
         ? getRandomIndex()
         : 0;
 
+      setLoadingSong(true);
+      setCurrentTime(0);
+      setDuration(0);
+      setBuffered(0);
+
       setCurrentIndex(index);
-      setCurrentSong(playlist[index]);
+      setCurrentSong(
+        playlist[index]
+      );
       setIsQueueSong(false);
       setIsPlaying(true);
 
@@ -487,6 +580,11 @@ export default function useAudio(
     if (shuffle) {
       if (playlist.length === 1) {
         if (repeatMode === "all") {
+          setLoadingSong(true);
+          setCurrentTime(0);
+          setDuration(0);
+          setBuffered(0);
+
           setCurrentIndex(0);
           setCurrentSong(playlist[0]);
           setIsPlaying(true);
@@ -495,10 +593,18 @@ export default function useAudio(
         return;
       }
 
-      const index = getRandomIndex();
+      const index =
+        getRandomIndex();
+
+      setLoadingSong(true);
+      setCurrentTime(0);
+      setDuration(0);
+      setBuffered(0);
 
       setCurrentIndex(index);
-      setCurrentSong(playlist[index]);
+      setCurrentSong(
+        playlist[index]
+      );
       setIsPlaying(true);
 
       return;
@@ -506,8 +612,16 @@ export default function useAudio(
 
     /* End of library. */
 
-    if (currentIndex >= playlist.length - 1) {
+    if (
+      activeIndex >=
+      playlist.length - 1
+    ) {
       if (repeatMode === "all") {
+        setLoadingSong(true);
+        setCurrentTime(0);
+        setDuration(0);
+        setBuffered(0);
+
         setCurrentIndex(0);
         setCurrentSong(playlist[0]);
         setIsPlaying(true);
@@ -520,13 +634,29 @@ export default function useAudio(
 
     /* Normal next. */
 
-    const nextIndex = currentIndex + 1;
+    const nextIndex =
+      activeIndex + 1;
+
+    if (
+      nextIndex < 0 ||
+      nextIndex >= playlist.length
+    ) {
+      setIsPlaying(false);
+      return;
+    }
+
+    setLoadingSong(true);
+    setCurrentTime(0);
+    setDuration(0);
+    setBuffered(0);
 
     setCurrentIndex(nextIndex);
-    setCurrentSong(playlist[nextIndex]);
+    setCurrentSong(
+      playlist[nextIndex]
+    );
     setIsPlaying(true);
   }, [
-    currentIndex,
+    activeIndex,
     getRandomIndex,
     isQueueSong,
     playlist,
@@ -540,7 +670,7 @@ export default function useAudio(
   /* Previous */
 
   const previousSong = useCallback(() => {
-    if (!currentSong) return;
+    if (!activeSong) return;
 
     if (currentTime > 3) {
       seek(0);
@@ -552,31 +682,50 @@ export default function useAudio(
       return;
     }
 
-    if (!playlist.length) return;
+    if (!playlist.length) {
+      return;
+    }
 
     if (shuffle) {
-      if (playlist.length === 1) return;
+      if (playlist.length === 1) {
+        return;
+      }
 
-      const index = getRandomIndex();
+      const index =
+        getRandomIndex();
+
+      setLoadingSong(true);
+      setCurrentTime(0);
+      setDuration(0);
+      setBuffered(0);
 
       setCurrentIndex(index);
-      setCurrentSong(playlist[index]);
+      setCurrentSong(
+        playlist[index]
+      );
       setIsPlaying(true);
 
       return;
     }
 
     const index =
-      currentIndex === 0
+      activeIndex <= 0
         ? playlist.length - 1
-        : currentIndex - 1;
+        : activeIndex - 1;
+
+    setLoadingSong(true);
+    setCurrentTime(0);
+    setDuration(0);
+    setBuffered(0);
 
     setCurrentIndex(index);
-    setCurrentSong(playlist[index]);
+    setCurrentSong(
+      playlist[index]
+    );
     setIsPlaying(true);
   }, [
-    currentIndex,
-    currentSong,
+    activeIndex,
+    activeSong,
     currentTime,
     getRandomIndex,
     isQueueSong,
@@ -606,7 +755,10 @@ export default function useAudio(
       nextSong();
     };
 
-    audio.addEventListener("ended", handleEnded);
+    audio.addEventListener(
+      "ended",
+      handleEnded
+    );
 
     return () => {
       audio.removeEventListener(
@@ -618,18 +770,17 @@ export default function useAudio(
 
   /* Current library index */
 
-  const currentLibraryIndex = !isQueueSong
-    ? playlist.findIndex(
-        (song) =>
-          song.id === currentSong?.id
-      )
-    : -1;
+  const currentLibraryIndex =
+    !isQueueSong
+      ? activeIndex
+      : -1;
 
   return {
     audioRef,
 
-    currentSong,
-    currentIndex,
+    currentSong: activeSong,
+    currentIndex: activeIndex,
+
     currentTime,
     duration,
     buffered,

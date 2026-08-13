@@ -1,6 +1,7 @@
 "use client";
 
 import { memo } from "react";
+import Image from "next/image";
 import {
   Heart,
   Play,
@@ -9,7 +10,8 @@ import {
   ListMusic,
 } from "lucide-react";
 
-// Memoized PlaylistItem to prevent unnecessary re-renders
+const DEFAULT_COVER = "/covers/default.jpg";
+
 const PlaylistItem = memo(
   ({
     song,
@@ -22,16 +24,15 @@ const PlaylistItem = memo(
     onAddToQueue,
     onPlayNext,
   }) => {
+    const cover = song.cover || DEFAULT_COVER;
+
     return (
       <div
         onClick={() => onSelect(index)}
         role="button"
         tabIndex={0}
         onKeyDown={(e) => {
-          if (
-            e.key === "Enter" ||
-            e.key === " "
-          ) {
+          if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
             onSelect(index);
           }
@@ -50,36 +51,64 @@ const PlaylistItem = memo(
           ${isActive ? "bg-white/10" : ""}
         `}
       >
-        {/* Play/Pause Icon */}
-        <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg">
-          {isActive && isPlaying ? (
-            <div className="flex h-full w-full items-center justify-center bg-blue-500/20">
+        {/* Album Cover */}
+        <div
+          className="
+            relative
+            h-12
+            w-12
+            shrink-0
+            overflow-hidden
+            rounded-lg
+            bg-zinc-800
+          "
+        >
+          <Image
+            src={cover}
+            alt={`${song.title} cover`}
+            fill
+            sizes="48px"
+            className="object-cover"
+          />
+
+          {/* Play/Pause Overlay */}
+          <div
+            className={`
+              absolute
+              inset-0
+              flex
+              items-center
+              justify-center
+              transition-all
+              duration-200
+              ${
+                isActive
+                  ? "bg-black/40 opacity-100"
+                  : "bg-black/50 opacity-0 group-hover:opacity-100"
+              }
+            `}
+          >
+            {isActive && isPlaying ? (
               <Pause
-                size={20}
-                className="text-blue-400"
+                size={18}
+                className="text-white"
               />
-            </div>
-          ) : (
-            <div className="flex h-full w-full items-center justify-center bg-zinc-800">
-              {isActive ? (
-                <Play
-                  size={20}
-                  className="text-blue-400"
-                />
-              ) : (
-                <span className="text-sm text-zinc-500">
-                  {index + 1}
-                </span>
-              )}
-            </div>
-          )}
+            ) : (
+              <Play
+                size={18}
+                className="translate-x-0.5 text-white"
+              />
+            )}
+          </div>
         </div>
 
         {/* Song Info */}
         <div className="min-w-0 flex-1">
           <h3
             className={`
-              truncate text-sm font-medium
+              truncate
+              text-sm
+              font-medium
               ${
                 isActive
                   ? "text-blue-400"
@@ -190,7 +219,7 @@ const PlaylistItem = memo(
 PlaylistItem.displayName = "PlaylistItem";
 
 export default function Playlist({
-  songs,
+  songs = [],
   currentSongId,
   isPlaying,
   favorites = [],
@@ -199,41 +228,32 @@ export default function Playlist({
   onAddToQueue,
   onPlayNext,
 }) {
-  // Convert favorites to Set for O(1) lookups
   const favoriteSet = new Set(favorites);
+
+  if (songs.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-center text-zinc-500">
+        <p className="text-sm">No songs found</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-1">
-      {songs.length === 0 ? (
-        <div className="py-12 text-center text-zinc-500">
-          <p className="text-sm">
-            No songs found
-          </p>
-        </div>
-      ) : (
-        songs.map((song, index) => (
-          <PlaylistItem
-            key={song.id}
-            song={song}
-            index={index}
-            isActive={
-              song.id === currentSongId
-            }
-            isPlaying={isPlaying}
-            isFavorite={favoriteSet.has(
-              song.id
-            )}
-            onSelect={onSelectSong}
-            onToggleFavorite={
-              onToggleFavorite
-            }
-            onAddToQueue={
-              onAddToQueue
-            }
-            onPlayNext={onPlayNext}
-          />
-        ))
-      )}
+      {songs.map((song, index) => (
+        <PlaylistItem
+          key={song.id}
+          song={song}
+          index={index}
+          isActive={song.id === currentSongId}
+          isPlaying={isPlaying}
+          isFavorite={favoriteSet.has(song.id)}
+          onSelect={onSelectSong}
+          onToggleFavorite={onToggleFavorite}
+          onAddToQueue={onAddToQueue}
+          onPlayNext={onPlayNext}
+        />
+      ))}
     </div>
   );
 }

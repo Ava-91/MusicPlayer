@@ -49,57 +49,90 @@ export default function PlayerCard({
   onMoveQueueDown,
   onClearQueue,
 }) {
-  const [activeView, setActiveView] =
-    useState("library");
+  const [activeView, setActiveView] = useState("library");
 
-  // Guard against missing song
+  /*
+   * Keep the player stable even when the right panel changes
+   * between Library and an empty/populated Queue.
+   */
   if (!currentSong) {
     return (
-      <div className="flex h-full items-center justify-center text-zinc-400">
-        No matching song found.
-      </div>
+      <section className="flex h-full min-h-0 gap-6">
+        <div
+          className="
+            flex
+            w-112.5
+            shrink-0
+            items-center
+            justify-center
+            px-6
+          "
+        >
+          <p className="text-sm text-zinc-500">
+            No song selected.
+          </p>
+        </div>
+
+        <div
+          className="
+            min-h-0
+            min-w-0
+            flex-1
+            rounded-3xl
+            border
+            border-white/10
+            bg-black/20
+          "
+        />
+      </section>
     );
   }
 
   return (
-    <section className="flex h-full gap-6">
-      {/* Left Player */}
-      <motion.div
-        layout
+    <section className="flex h-full min-h-0 w-full gap-6">
+      {/* =====================================================
+          LEFT PLAYER
+      ====================================================== */}
+
+      <div
         className="
           flex
+          h-full
           w-112.5
+          min-h-0
           shrink-0
           flex-col
-          justify-between
           px-6
         "
       >
-        <motion.div
-          key={currentSong.id}
-          initial={{
-            opacity: 0,
-            y: 15,
-          }}
-          animate={{
-            opacity: 1,
-            y: 0,
-          }}
-          exit={{
-            opacity: 0,
-            y: -15,
-          }}
-          transition={{
-            duration: 0.35,
-          }}
-        >
-          <AlbumCover
-            cover={currentSong.cover}
-            title={currentSong.title}
-          />
-        </motion.div>
+        {/* Album cover area */}
 
-        <div className="space-y-2 text-center">
+        <div className="flex min-h-0 flex-1 items-center justify-center">
+          <motion.div
+            key={currentSong.id}
+            initial={{
+              opacity: 0,
+              y: 15,
+            }}
+            animate={{
+              opacity: 1,
+              y: 0,
+            }}
+            transition={{
+              duration: 0.35,
+            }}
+            className="w-full"
+          >
+            <AlbumCover
+              cover={currentSong.cover}
+              title={currentSong.title}
+            />
+          </motion.div>
+        </div>
+
+        {/* Song information */}
+
+        <div className="mt-6 shrink-0 space-y-2 text-center">
           <h1 className="truncate text-4xl font-bold">
             {currentSong.title}
           </h1>
@@ -109,13 +142,19 @@ export default function PlayerCard({
           </p>
         </div>
 
-        <ProgressBar
-          currentTime={currentTime}
-          duration={duration}
-          onSeek={onSeek}
-        />
+        {/* Progress */}
 
-        <div className="space-y-5">
+        <div className="mt-6 shrink-0">
+          <ProgressBar
+            currentTime={currentTime}
+            duration={duration}
+            onSeek={onSeek}
+          />
+        </div>
+
+        {/* Controls */}
+
+        <div className="mt-6 shrink-0 space-y-5 pb-2">
           <Controls
             isPlaying={isPlaying}
             shuffle={shuffle}
@@ -134,12 +173,17 @@ export default function PlayerCard({
             onMute={onMute}
           />
         </div>
-      </motion.div>
+      </div>
 
-      {/* Right Library / Queue */}
+      {/* =====================================================
+          RIGHT LIBRARY / QUEUE
+      ====================================================== */}
+
       <div
         className="
           flex
+          min-h-0
+          min-w-0
           flex-1
           flex-col
           overflow-hidden
@@ -149,10 +193,13 @@ export default function PlayerCard({
           bg-black/20
         "
       >
-        {/* Search + Keyboard Help */}
+        {/* Search / Queue header */}
+
         <div
           className="
             flex
+            h-22
+            shrink-0
             items-center
             gap-3
             border-b
@@ -190,10 +237,13 @@ export default function PlayerCard({
           <KeyboardShortcutsHelp />
         </div>
 
-        {/* Library / Queue Tabs */}
+        {/* Tabs */}
+
         <div
           className="
             flex
+            h-13
+            shrink-0
             border-b
             border-white/10
             px-6
@@ -201,9 +251,7 @@ export default function PlayerCard({
         >
           <button
             type="button"
-            onClick={() =>
-              setActiveView("library")
-            }
+            onClick={() => setActiveView("library")}
             className={`
               flex
               items-center
@@ -227,9 +275,7 @@ export default function PlayerCard({
 
           <button
             type="button"
-            onClick={() =>
-              setActiveView("queue")
-            }
+            onClick={() => setActiveView("queue")}
             className={`
               flex
               items-center
@@ -248,6 +294,7 @@ export default function PlayerCard({
             `}
           >
             <ListMusic size={16} />
+
             Queue
 
             {queue.length > 0 && (
@@ -268,7 +315,15 @@ export default function PlayerCard({
         </div>
 
         {/* Content */}
-        <div className="min-h-0 flex-1 overflow-y-auto p-6">
+
+        <div
+          className="
+            min-h-0
+            flex-1
+            overflow-y-auto
+            p-6
+          "
+        >
           {activeView === "library" && (
             <Playlist
               songs={songs}
@@ -276,12 +331,8 @@ export default function PlayerCard({
               isPlaying={isPlaying}
               favorites={favorites}
               onSelectSong={onSelectSong}
-              onToggleFavorite={
-                onToggleFavorite
-              }
-              onAddToQueue={
-                onAddToQueue
-              }
+              onToggleFavorite={onToggleFavorite}
+              onAddToQueue={onAddToQueue}
               onPlayNext={onPlayNext}
             />
           )}
@@ -290,21 +341,11 @@ export default function PlayerCard({
             <Queue
               queue={queue}
               currentSongId={currentSongId}
-              onRemoveFromQueue={
-                onRemoveFromQueue
-              }
-              onMoveInQueue={
-                onMoveInQueue
-              }
-              onMoveQueueUp={
-                onMoveQueueUp
-              }
-              onMoveQueueDown={
-                onMoveQueueDown
-              }
-              onClearQueue={
-                onClearQueue
-              }
+              onRemoveFromQueue={onRemoveFromQueue}
+              onMoveInQueue={onMoveInQueue}
+              onMoveQueueUp={onMoveQueueUp}
+              onMoveQueueDown={onMoveQueueDown}
+              onClearQueue={onClearQueue}
             />
           )}
         </div>
