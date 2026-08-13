@@ -47,7 +47,6 @@ export default function ProgressBar({
 
   return (
     <div className="space-y-3">
-
       {/* Progress Bar */}
 
       <div
@@ -55,56 +54,64 @@ export default function ProgressBar({
         className="
           group
           relative
-          h-2
+          h-5
           cursor-pointer
-          rounded-full
-          bg-white/10
-          overflow-hidden
         "
       >
-        {/* Progress */}
+        {/* Actual Bar */}
 
         <div
           className="
             absolute
             left-0
-            top-0
-            h-full
-
+            top-1/2
+            h-2
+            w-full
+            -translate-y-1/2
+            overflow-hidden
             rounded-full
-
-            bg-linear-to-r
-            from-sky-400
-            via-cyan-400
-            to-blue-500
-
-            transition-[width]
-            duration-150
+            bg-white/10
           "
-          style={{
-            width: `${percentage}%`,
-          }}
-        />
+        >
+          {/* Progress */}
 
-        {/* Glow */}
+          <div
+            className="
+              absolute
+              left-0
+              top-0
+              h-full
+              rounded-full
+              bg-linear-to-r
+              from-sky-400
+              via-cyan-400
+              to-blue-500
+              transition-[width]
+              duration-150
+            "
+            style={{
+              width: `${percentage}%`,
+            }}
+          />
 
-        <div
-          className="
-            absolute
-            left-0
-            top-0
-            h-full
+          {/* Glow */}
 
-            bg-cyan-400/40
-            blur-md
-
-            transition-[width]
-            duration-150
-          "
-          style={{
-            width: `${percentage}%`,
-          }}
-        />
+          <div
+            className="
+              absolute
+              left-0
+              top-0
+              h-full
+              bg-cyan-400/40
+              blur-md
+              transition-[width]
+              duration-150
+            "
+            style={{
+              width: `${percentage}%`,
+            }}
+          />
+        </div>
 
         {/* Thumb */}
 
@@ -112,28 +119,19 @@ export default function ProgressBar({
           className="
             absolute
             top-1/2
-
             h-5
             w-5
-
-            -translate-y-1/2
             -translate-x-1/2
-
+            -translate-y-1/2
             rounded-full
-
             border-2
             border-white
-
             bg-cyan-400
-
             shadow-[0_0_18px_rgba(34,211,238,.8)]
-
             opacity-0
             scale-75
-
             transition-all
             duration-200
-
             group-hover:opacity-100
             group-hover:scale-100
           "
@@ -154,12 +152,9 @@ export default function ProgressBar({
           className="
             absolute
             inset-0
-
             h-full
             w-full
-
             cursor-pointer
-
             opacity-0
           "
         />
@@ -172,21 +167,15 @@ export default function ProgressBar({
           flex
           items-center
           justify-between
-
           text-xs
           font-medium
-
           text-zinc-400
           tabular-nums
         "
       >
-        <span>
-          {formatTime(currentTime)}
-        </span>
+        <span>{formatTime(currentTime)}</span>
 
-        <span>
-          {formatTime(duration)}
-        </span>
+        <span>{formatTime(duration)}</span>
       </div>
     </div>
   );

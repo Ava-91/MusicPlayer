@@ -109,6 +109,17 @@ export default function useAudio(
     audio.playbackRate = playbackRate;
   }, [volume, muted, playbackRate]);
 
+  useEffect(() => {
+    if (!currentSong && playlist.length > 0) {
+      setCurrentIndex(initialIndex);
+      setCurrentSong(playlist[initialIndex] || playlist[0]);
+      setIsQueueSong(false);
+    }
+  }, [
+    playlist,
+    initialIndex,
+    currentSong,
+  ]);
   /* Load current song */
 
   useEffect(() => {

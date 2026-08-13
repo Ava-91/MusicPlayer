@@ -25,6 +25,7 @@ export default function VolumeSlider({
   return (
     <div className="flex items-center gap-3">
       {/* Mute Button */}
+
       <button
         type="button"
         onClick={onMute}
@@ -50,10 +51,13 @@ export default function VolumeSlider({
       </button>
 
       {/* Volume Slider */}
-      <div className="relative flex-1">
+
+      <div className="relative flex h-4 flex-1 items-center">
         {/* Background */}
+
         <div
           className="
+            pointer-events-none
             absolute
             left-0
             top-1/2
@@ -66,6 +70,7 @@ export default function VolumeSlider({
         />
 
         {/* Active Fill */}
+
         <div
           className="
             pointer-events-none
@@ -80,7 +85,7 @@ export default function VolumeSlider({
             via-blue-500
             to-cyan-400
             shadow-[0_0_18px_rgba(59,130,246,.45)]
-            transition-all
+            transition-[width]
             duration-200
           "
           style={{
@@ -88,22 +93,28 @@ export default function VolumeSlider({
           }}
         />
 
+        {/* Slider */}
+
         <input
           type="range"
           min={0}
           max={1}
           step={0.01}
           value={volume}
-          onChange={(e) => onChange(Number(e.target.value))}
+          onChange={(e) =>
+            onChange(Number(e.target.value))
+          }
           aria-label="Volume slider"
           className="
             relative
-            h-1.5
+            z-10
+            h-4
             w-full
             cursor-pointer
             appearance-none
             bg-transparent
 
+            [&::-webkit-slider-runnable-track]:h-1.5
             [&::-webkit-slider-runnable-track]:bg-transparent
 
             [&::-webkit-slider-thumb]:appearance-none
@@ -112,11 +123,13 @@ export default function VolumeSlider({
             [&::-webkit-slider-thumb]:rounded-full
             [&::-webkit-slider-thumb]:bg-white
             [&::-webkit-slider-thumb]:shadow-[0_0_12px_rgba(255,255,255,.6)]
-            [&::-webkit-slider-thumb]:transition-all
+            [&::-webkit-slider-thumb]:transition-transform
             [&::-webkit-slider-thumb]:duration-200
             [&::-webkit-slider-thumb]:hover:scale-110
 
+            [&::-moz-range-track]:h-1.5
             [&::-moz-range-track]:bg-transparent
+
             [&::-moz-range-thumb]:border-0
             [&::-moz-range-thumb]:h-4
             [&::-moz-range-thumb]:w-4
@@ -127,6 +140,7 @@ export default function VolumeSlider({
       </div>
 
       {/* Volume Percentage */}
+
       <span
         className="
           w-10
