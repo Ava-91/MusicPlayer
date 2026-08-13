@@ -1,16 +1,26 @@
 "use client";
 
-import { ListMusic, ChevronUp, ChevronDown } from "lucide-react";
+import {
+  ListMusic,
+  ChevronUp,
+  ChevronDown,
+} from "lucide-react";
 
 export default function QueueButton({
   expanded,
   onToggle,
-  count,
+  count = 0,
 }) {
   return (
     <button
       type="button"
       onClick={onToggle}
+      aria-expanded={expanded}
+      aria-label={
+        expanded
+          ? "Collapse playback queue"
+          : "Expand playback queue"
+      }
       className="
         group
         flex
@@ -31,6 +41,7 @@ export default function QueueButton({
         active:scale-[0.98]
       "
     >
+      {/* Queue Info */}
       <div className="flex items-center gap-3">
         <div
           className="
@@ -54,23 +65,27 @@ export default function QueueButton({
 
         <div className="text-left">
           <p className="font-semibold text-white">
-            Playlist
+            Queue
           </p>
 
           <p className="text-sm text-zinc-400">
-            {count} {count === 1 ? "song" : "songs"}
+            {count}{" "}
+            {count === 1 ? "song" : "songs"}
           </p>
         </div>
       </div>
 
+      {/* Expand / Collapse */}
       <div
         className="
           rounded-full
           bg-white/5
           p-2
+          text-zinc-300
           transition-all
           duration-300
           group-hover:bg-white/10
+          group-hover:text-white
         "
       >
         {expanded ? (

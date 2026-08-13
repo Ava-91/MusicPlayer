@@ -7,6 +7,7 @@ export default function useQueue() {
 
   /**
    * Add a song to the end of the queue.
+   *
    * Duplicate songs are allowed.
    */
   const addToQueue = useCallback((song) => {
@@ -21,32 +22,27 @@ export default function useQueue() {
   }, []);
 
   /**
-   * Add a song immediately after the currently playing song.
+   * Add a song to the front of the queue.
    *
-   * currentIndex is the position of the currently playing
-   * song in the queue.
+   * This means the song will be played
+   * before every other queued song.
    */
-  const playNext = useCallback((song, currentIndex = -1) => {
+  const playNext = useCallback((song) => {
     if (!song) {
       return;
     }
 
-    setQueue((currentQueue) => {
-      const insertIndex = currentIndex + 1;
-
-      return [
-        ...currentQueue.slice(0, insertIndex),
-        song,
-        ...currentQueue.slice(insertIndex),
-      ];
-    });
+    setQueue((currentQueue) => [
+      song,
+      ...currentQueue,
+    ]);
   }, []);
 
   /**
-   * Remove a song from the queue by its queue index.
+   * Remove a song from the queue by index.
    *
-   * We remove by index rather than ID because duplicate
-   * songs are allowed in the queue.
+   * We remove by index because duplicate
+   * songs are allowed.
    */
   const removeFromQueue = useCallback((index) => {
     setQueue((currentQueue) => {
@@ -58,13 +54,30 @@ export default function useQueue() {
       }
 
       return currentQueue.filter(
-        (_, queueIndex) => queueIndex !== index
+        (_, queueIndex) =>
+          queueIndex !== index
       );
     });
   }, []);
 
   /**
-   * Move a queue item from one position to another.
+   * Remove the first song from the queue.
+   *
+   * Useful when a queued song starts playing.
+   */
+  const removeFirst = useCallback(() => {
+    setQueue((currentQueue) => {
+      if (!currentQueue.length) {
+        return currentQueue;
+      }
+
+      return currentQueue.slice(1);
+    });
+  }, []);
+
+  /**
+   * Move a queue item from one position
+   * to another.
    */
   const moveInQueue = useCallback(
     (fromIndex, toIndex) => {
@@ -81,10 +94,11 @@ export default function useQueue() {
 
         const nextQueue = [...currentQueue];
 
-        const [movedSong] = nextQueue.splice(
-          fromIndex,
-          1
-        );
+        const [movedSong] =
+          nextQueue.splice(
+            fromIndex,
+            1
+          );
 
         nextQueue.splice(
           toIndex,
@@ -159,8 +173,6 @@ export default function useQueue() {
 
   /**
    * Replace the entire queue.
-   * Useful when a future feature wants to load
-   * a playlist or album into the queue.
    */
   const setQueueItems = useCallback((songs) => {
     if (!Array.isArray(songs)) {
@@ -178,6 +190,8 @@ export default function useQueue() {
     playNext,
 
     removeFromQueue,
+    removeFirst,
+
     moveInQueue,
     moveUp,
     moveDown,

@@ -1,8 +1,7 @@
 "use client";
 
-import { memo, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-
 import Image from "next/image";
 
 import {
@@ -10,6 +9,8 @@ import {
   MoreHorizontal,
   Play,
   Pause,
+  ListPlus,
+  ListMusic,
 } from "lucide-react";
 
 function formatTime(seconds) {
@@ -30,8 +31,55 @@ function PlaylistItem({
   isFavorite,
   onClick,
   onToggleFavorite,
+  onAddToQueue,
+  onPlayNext,
 }) {
   const [imageError, setImageError] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const menuRef = useRef(null);
+
+  // Close the menu when clicking outside.
+  useEffect(() => {
+    if (!menuOpen) {
+      return;
+    }
+
+    const handlePointerDown = (event) => {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target)
+      ) {
+        setMenuOpen(false);
+      }
+    };
+
+    document.addEventListener(
+      "pointerdown",
+      handlePointerDown
+    );
+
+    return () => {
+      document.removeEventListener(
+        "pointerdown",
+        handlePointerDown
+      );
+    };
+  }, [menuOpen]);
+
+  const handleAddToQueue = (event) => {
+    event.stopPropagation();
+
+    onAddToQueue?.(song);
+    setMenuOpen(false);
+  };
+
+  const handlePlayNext = (event) => {
+    event.stopPropagation();
+
+    onPlayNext?.(song);
+    setMenuOpen(false);
+  };
 
   return (
     <motion.button
@@ -46,7 +94,10 @@ function PlaylistItem({
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
+        if (
+          e.key === "Enter" ||
+          e.key === " "
+        ) {
           e.preventDefault();
           onClick();
         }
@@ -58,13 +109,14 @@ function PlaylistItem({
         w-full
         items-center
         gap-4
-        overflow-hidden
+        overflow-visible
         rounded-2xl
         border
         px-4
         py-3
         transition-all
         duration-300
+
         ${
           active
             ? `
@@ -86,6 +138,7 @@ function PlaylistItem({
         <motion.div
           layoutId="playlist-active"
           className="
+            pointer-events-none
             absolute
             inset-0
             rounded-2xl
@@ -93,7 +146,6 @@ function PlaylistItem({
             from-cyan-500/10
             via-sky-500/10
             to-blue-500/10
-            pointer-events-none
           "
         />
       )}
@@ -123,12 +175,16 @@ function PlaylistItem({
               group-hover:scale-110
             "
             onError={() => setImageError(true)}
-            unoptimized={song.cover?.startsWith('http')}
+            unoptimized={song.cover?.startsWith(
+              "http"
+            )}
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center">
             <span className="text-sm font-medium text-zinc-500">
-              {song.title?.charAt(0).toUpperCase() || '?'}
+              {song.title
+                ?.charAt(0)
+                .toUpperCase() || "?"}
             </span>
           </div>
         )}
@@ -136,6 +192,7 @@ function PlaylistItem({
         {/* Hover Overlay */}
         <div
           className="
+            pointer-events-none
             absolute
             inset-0
             flex
@@ -149,9 +206,17 @@ function PlaylistItem({
           "
         >
           {active && isPlaying ? (
-            <Pause size={22} fill="white" className="text-white" />
+            <Pause
+              size={22}
+              fill="white"
+              className="text-white"
+            />
           ) : (
-            <Play size={22} fill="white" className="text-white" />
+            <Play
+              size={22}
+              fill="white"
+              className="text-white"
+            />
           )}
         </div>
       </div>
@@ -169,6 +234,7 @@ function PlaylistItem({
             truncate
             font-semibold
             transition-colors
+
             ${
               active
                 ? "text-cyan-300"
@@ -205,6 +271,7 @@ function PlaylistItem({
       {/* Right Side */}
       <div
         className="
+          relative
           flex
           items-center
           gap-3
@@ -266,29 +333,118 @@ function PlaylistItem({
             hover:text-pink-400
             group-hover:opacity-100
           "
+          aria-label={
+            isFavorite
+              ? `Remove ${song.title} from favorites`
+              : `Add ${song.title} to favorites`
+          }
         >
           <Heart
             size={18}
-            className={isFavorite ? 'fill-pink-400 text-pink-400' : ''}
+            className={
+              isFavorite
+                ? "fill-pink-400 text-pink-400"
+                : ""
+            }
           />
         </button>
 
-        {/* More */}
-        <button
-          type="button"
-          onClick={(e) => e.stopPropagation()}
-          className="
-            rounded-full
-            p-2
-            text-zinc-500
-            opacity-0
-            transition-all
-            hover:text-white
-            group-hover:opacity-100
-          "
+        {/* More Menu */}
+        <div
+          ref={menuRef}
+          className="relative"
         >
-          <MoreHorizontal size={18} />
-        </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setMenuOpen((open) => !open);
+            }}
+            className="
+              rounded-full
+              p-2
+              text-zinc-500
+              opacity-0
+              transition-all
+              hover:bg-white/10
+              hover:text-white
+              group-hover:opacity-100
+            "
+            aria-label={`More options for ${song.title}`}
+            aria-expanded={menuOpen}
+          >
+            <MoreHorizontal size={18} />
+          </button>
+
+          {menuOpen && (
+            <div
+              className="
+                absolute
+                right-0
+                top-full
+                z-50
+                mt-2
+                w-48
+                overflow-hidden
+                rounded-xl
+                border
+                border-white/10
+                bg-zinc-900
+                p-1
+                shadow-2xl
+              "
+              onClick={(e) =>
+                e.stopPropagation()
+              }
+            >
+              <button
+                type="button"
+                onClick={handleAddToQueue}
+                className="
+                  flex
+                  w-full
+                  items-center
+                  gap-3
+                  rounded-lg
+                  px-3
+                  py-2.5
+                  text-left
+                  text-sm
+                  text-zinc-300
+                  transition
+                  hover:bg-white/10
+                  hover:text-white
+                "
+              >
+                <ListPlus size={16} />
+                Add to Queue
+              </button>
+
+              <button
+                type="button"
+                onClick={handlePlayNext}
+                className="
+                  flex
+                  w-full
+                  items-center
+                  gap-3
+                  rounded-lg
+                  px-3
+                  py-2.5
+                  text-left
+                  text-sm
+                  text-zinc-300
+                  transition
+                  hover:bg-white/10
+                  hover:text-white
+                "
+              >
+                <ListMusic size={16} />
+                Play Next
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </motion.button>
   );

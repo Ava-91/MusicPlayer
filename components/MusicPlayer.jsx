@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+
 import usePlaylist from "./hooks/usePlaylist";
 import useQueue from "./hooks/useQueue";
 import useAudio from "./hooks/useAudio";
@@ -17,9 +18,13 @@ export default function MusicPlayer() {
 
   const player = useAudio(
     playlist.filteredSongs,
-    0
+    0,
+    queue
   );
 
+  /*
+   * Keyboard controls
+   */
   useKeyboard({
     togglePlay: player.togglePlay,
     nextSong: player.nextSong,
@@ -32,8 +37,10 @@ export default function MusicPlayer() {
     toggleShuffle: player.toggleShuffle,
   });
 
-  // When the filtered playlist changes,
-  // ensure the current song still exists.
+  /*
+   * Keep the current song valid when
+   * the filtered playlist changes.
+   */
   useEffect(() => {
     if (!playlist.filteredSongs.length) {
       return;
@@ -45,8 +52,6 @@ export default function MusicPlayer() {
           song.id === player.currentSong?.id
       );
 
-    // If the current song no longer exists
-    // in the filtered playlist, select the first song.
     if (!currentExists) {
       player.selectSong(0);
     }
@@ -55,124 +60,205 @@ export default function MusicPlayer() {
     player.currentSong?.id,
   ]);
 
-  // Loading state
+  /*
+   * Loading state
+   */
   if (playlist.loading) {
     return <LoadingState />;
   }
 
-  // Error state
+  /*
+   * Error state
+   */
   if (playlist.error) {
     return <ErrorState />;
   }
 
-  // Empty state
+  /*
+   * Empty library state
+   */
   if (!playlist.songs.length) {
     return <EmptyState />;
   }
 
   return (
     <PlayerCard
+      /* =========================
+         Library
+         ========================= */
       songs={playlist.filteredSongs}
       search={playlist.search}
       favorites={playlist.favorites}
       sortBy={playlist.sortBy}
 
+      /* =========================
+         Queue
+         ========================= */
       queue={queue.queue}
+
       onAddToQueue={queue.addToQueue}
+
       onPlayNext={queue.playNext}
+
       onRemoveFromQueue={
         queue.removeFromQueue
       }
+
       onMoveInQueue={
         queue.moveInQueue
       }
+
       onMoveQueueUp={
         queue.moveUp
       }
+
       onMoveQueueDown={
         queue.moveDown
       }
+
       onClearQueue={
         queue.clearQueue
       }
 
+      /* =========================
+         Current Song
+         ========================= */
       currentSong={player.currentSong}
+
       currentSongId={
         player.currentSong?.id
       }
+
       currentIndex={player.currentIndex}
 
+      /* =========================
+         Playback
+         ========================= */
       isPlaying={player.isPlaying}
+
       currentTime={player.currentTime}
+
       duration={player.duration}
+
       buffered={player.buffered}
 
-      volume={player.volume}
-      muted={player.muted}
-      playbackRate={player.playbackRate}
-      repeatMode={player.repeatMode}
-      shuffle={player.shuffle}
-
       loadingSong={player.loadingSong}
+
       audioRef={player.audioRef}
 
-      onPlayPause={
-        player.togglePlay
-      }
-      onNext={player.nextSong}
-      onPrevious={
-        player.previousSong
-      }
+      /* =========================
+         Volume
+         ========================= */
+      volume={player.volume}
 
-      onSeek={player.seek}
-      onSeekForward={
-        player.seekForward
-      }
-      onSeekBackward={
-        player.seekBackward
-      }
+      muted={player.muted}
 
       onVolume={
         player.setVolume
       }
+
       onMute={
         player.toggleMute
       }
 
+      /* =========================
+         Playback Settings
+         ========================= */
+      playbackRate={
+        player.playbackRate
+      }
+
+      repeatMode={
+        player.repeatMode
+      }
+
+      shuffle={
+        player.shuffle
+      }
+
+      /* =========================
+         Main Controls
+         ========================= */
+      onPlayPause={
+        player.togglePlay
+      }
+
+      onNext={
+        player.nextSong
+      }
+
+      onPrevious={
+        player.previousSong
+      }
+
+      /* =========================
+         Seeking
+         ========================= */
+      onSeek={
+        player.seek
+      }
+
+      onSeekForward={
+        player.seekForward
+      }
+
+      onSeekBackward={
+        player.seekBackward
+      }
+
+      /* =========================
+         Playback Options
+         ========================= */
       onPlaybackRate={
         player.togglePlaybackRate
       }
+
       onRepeat={
         player.cycleRepeat
       }
+
       onShuffle={
         player.toggleShuffle
       }
 
+      /* =========================
+         Song Selection
+         ========================= */
       onSelectSong={
         player.selectSong
       }
 
+      /* =========================
+         Search / Sorting
+         ========================= */
       onSearch={
         playlist.setSearch
-      }
-      onSort={
-        playlist.setSortBy
-      }
-
-      onToggleFavorite={
-        playlist.toggleFavorite
-      }
-
-      onRefresh={
-        playlist.refresh
       }
 
       onSearchChange={
         playlist.setSearch
       }
+
       onSearchClear={
         playlist.clearSearch
+      }
+
+      onSort={
+        playlist.setSortBy
+      }
+
+      /* =========================
+         Favorites
+         ========================= */
+      onToggleFavorite={
+        playlist.toggleFavorite
+      }
+
+      /* =========================
+         Playlist
+         ========================= */
+      onRefresh={
+        playlist.refresh
       }
     />
   );

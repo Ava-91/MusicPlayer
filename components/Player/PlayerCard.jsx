@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import { ListMusic, Music2 } from "lucide-react";
 import { motion } from "framer-motion";
 
 import KeyboardShortcutsHelp from "./KeyboardShortcutsHelp";
@@ -7,6 +9,7 @@ import AlbumCover from "./AlbumCover";
 import Controls from "./Controls";
 import ProgressBar from "./ProgressBar";
 import Playlist from "./Playlist";
+import Queue from "./Queue";
 import VolumeSlider from "./VolumeSlider";
 import SearchBar from "./SearchBar";
 
@@ -37,7 +40,7 @@ export default function PlayerCard({
   onRepeat,
 
   // Queue
-  queue,
+  queue = [],
   onAddToQueue,
   onPlayNext,
   onRemoveFromQueue,
@@ -46,6 +49,9 @@ export default function PlayerCard({
   onMoveQueueDown,
   onClearQueue,
 }) {
+  const [activeView, setActiveView] =
+    useState("library");
+
   // Guard against missing song
   if (!currentSong) {
     return (
@@ -130,7 +136,7 @@ export default function PlayerCard({
         </div>
       </motion.div>
 
-      {/* Right Playlist */}
+      {/* Right Library / Queue */}
       <div
         className="
           flex
@@ -155,26 +161,152 @@ export default function PlayerCard({
           "
         >
           <div className="min-w-0 flex-1">
-            <SearchBar
-              value={search}
-              onChange={onSearchChange}
-              onClear={onSearchClear}
-            />
+            {activeView === "library" && (
+              <SearchBar
+                value={search}
+                onChange={onSearchChange}
+                onClear={onSearchClear}
+              />
+            )}
+
+            {activeView === "queue" && (
+              <div className="flex h-10 items-center">
+                <div>
+                  <h2 className="text-sm font-semibold text-white">
+                    Playback Queue
+                  </h2>
+
+                  <p className="text-xs text-zinc-500">
+                    {queue.length}{" "}
+                    {queue.length === 1
+                      ? "song"
+                      : "songs"}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
 
           <KeyboardShortcutsHelp />
         </div>
 
-        {/* Scrollable Playlist */}
-        <div className="flex-1 overflow-y-auto p-6">
-          <Playlist
-            songs={songs}
-            currentSongId={currentSongId}
-            isPlaying={isPlaying}
-            favorites={favorites}
-            onSelectSong={onSelectSong}
-            onToggleFavorite={onToggleFavorite}
-          />
+        {/* Library / Queue Tabs */}
+        <div
+          className="
+            flex
+            border-b
+            border-white/10
+            px-6
+          "
+        >
+          <button
+            type="button"
+            onClick={() =>
+              setActiveView("library")
+            }
+            className={`
+              flex
+              items-center
+              gap-2
+              border-b-2
+              px-4
+              py-3
+              text-sm
+              font-medium
+              transition
+              ${
+                activeView === "library"
+                  ? "border-white text-white"
+                  : "border-transparent text-zinc-500 hover:text-zinc-300"
+              }
+            `}
+          >
+            <Music2 size={16} />
+            Library
+          </button>
+
+          <button
+            type="button"
+            onClick={() =>
+              setActiveView("queue")
+            }
+            className={`
+              flex
+              items-center
+              gap-2
+              border-b-2
+              px-4
+              py-3
+              text-sm
+              font-medium
+              transition
+              ${
+                activeView === "queue"
+                  ? "border-white text-white"
+                  : "border-transparent text-zinc-500 hover:text-zinc-300"
+              }
+            `}
+          >
+            <ListMusic size={16} />
+            Queue
+
+            {queue.length > 0 && (
+              <span
+                className="
+                  rounded-full
+                  bg-white/10
+                  px-1.5
+                  py-0.5
+                  text-[10px]
+                  text-zinc-400
+                "
+              >
+                {queue.length}
+              </span>
+            )}
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="min-h-0 flex-1 overflow-y-auto p-6">
+          {activeView === "library" && (
+            <Playlist
+              songs={songs}
+              currentSongId={currentSongId}
+              isPlaying={isPlaying}
+              favorites={favorites}
+              onSelectSong={onSelectSong}
+              onToggleFavorite={
+                onToggleFavorite
+              }
+              onAddToQueue={
+                onAddToQueue
+              }
+              onPlayNext={onPlayNext}
+            />
+          )}
+
+          {activeView === "queue" && (
+            <Queue
+              queue={queue}
+              currentSongId={currentSongId}
+              onRemoveFromQueue={
+                onRemoveFromQueue
+              }
+              onMoveInQueue={
+                onMoveInQueue
+              }
+              onMoveQueueUp={
+                onMoveQueueUp
+              }
+              onMoveQueueDown={
+                onMoveQueueDown
+              }
+              onClearQueue={
+                onClearQueue
+              }
+            />
+          )}
         </div>
       </div>
     </section>
