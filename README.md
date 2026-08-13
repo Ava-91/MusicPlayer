@@ -6,6 +6,8 @@ MusicPlayer is designed to turn a local music collection into a polished, cinema
 
 Your music stays on your machine. No cloud music library is required.
 
+![MusicPlayer preview](docs/musicplayer-preview.png)
+
 ---
 
 ## ✨ Features
