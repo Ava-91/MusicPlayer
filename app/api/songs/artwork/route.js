@@ -71,10 +71,7 @@ export async function GET(request) {
       }
     );
   } catch (error) {
-    console.warn(
-      `Couldn't read artwork from ${filename}:`,
-      error
-    );
+  console.warn("Couldn't read artwork:", filename, error);
 
     return new Response(
       "Couldn't read artwork",
