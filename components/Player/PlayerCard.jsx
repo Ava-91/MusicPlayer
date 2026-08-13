@@ -35,6 +35,16 @@ export default function PlayerCard({
   onToggleFavorite,
   onShuffle,
   onRepeat,
+
+  // Queue
+  queue,
+  onAddToQueue,
+  onPlayNext,
+  onRemoveFromQueue,
+  onMoveInQueue,
+  onMoveQueueUp,
+  onMoveQueueDown,
+  onClearQueue,
 }) {
   // Guard against missing song
   if (!currentSong) {
@@ -59,29 +69,30 @@ export default function PlayerCard({
           px-6
         "
       >
-      <motion.div
-        key={currentSong.id}
-        initial={{
-          opacity: 0,
-          y: 15,
-        }}
-        animate={{
-          opacity: 1,
-          y: 0,
-        }}
-        exit={{
-          opacity: 0,
-          y: -15,
-        }}
-        transition={{
-          duration: 0.35,
-        }}
-      >
-        <AlbumCover
-          cover={currentSong.cover}
-          title={currentSong.title}
-        />
-      </motion.div>
+        <motion.div
+          key={currentSong.id}
+          initial={{
+            opacity: 0,
+            y: 15,
+          }}
+          animate={{
+            opacity: 1,
+            y: 0,
+          }}
+          exit={{
+            opacity: 0,
+            y: -15,
+          }}
+          transition={{
+            duration: 0.35,
+          }}
+        >
+          <AlbumCover
+            cover={currentSong.cover}
+            title={currentSong.title}
+          />
+        </motion.div>
+
         <div className="space-y-2 text-center">
           <h1 className="truncate text-4xl font-bold">
             {currentSong.title}
@@ -162,9 +173,7 @@ export default function PlayerCard({
             isPlaying={isPlaying}
             favorites={favorites}
             onSelectSong={onSelectSong}
-            onToggleFavorite={
-              onToggleFavorite
-            }
+            onToggleFavorite={onToggleFavorite}
           />
         </div>
       </div>

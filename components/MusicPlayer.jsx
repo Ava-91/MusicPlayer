@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import usePlaylist from "./hooks/usePlaylist";
+import useQueue from "./hooks/useQueue";
 import useAudio from "./hooks/useAudio";
 import useKeyboard from "./hooks/useKeyboard";
 
@@ -12,6 +13,7 @@ import EmptyState from "./Player/EmptyState";
 
 export default function MusicPlayer() {
   const playlist = usePlaylist();
+  const queue = useQueue();
 
   const player = useAudio(
     playlist.filteredSongs,
@@ -74,6 +76,25 @@ export default function MusicPlayer() {
       search={playlist.search}
       favorites={playlist.favorites}
       sortBy={playlist.sortBy}
+
+      queue={queue.queue}
+      onAddToQueue={queue.addToQueue}
+      onPlayNext={queue.playNext}
+      onRemoveFromQueue={
+        queue.removeFromQueue
+      }
+      onMoveInQueue={
+        queue.moveInQueue
+      }
+      onMoveQueueUp={
+        queue.moveUp
+      }
+      onMoveQueueDown={
+        queue.moveDown
+      }
+      onClearQueue={
+        queue.clearQueue
+      }
 
       currentSong={player.currentSong}
       currentSongId={
