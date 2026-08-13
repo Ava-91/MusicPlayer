@@ -1,11 +1,28 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+const clamp = (value, min, max) =>
+  Math.max(min, Math.min(max, value));
+
+const getStoredNumber = (key, fallback, min, max) => {
+  if (typeof window === "undefined") return fallback;
+
+  const value = Number(localStorage.getItem(key));
+
+  return Number.isFinite(value)
+    ? clamp(value, min, max)
+    : fallback;
+};
+
+const getStoredBoolean = (key) =>
+  typeof window !== "undefined" &&
+  localStorage.getItem(key) === "true";
+
+const getStoredRepeat = () =>
+  typeof window !== "undefined"
+    ? localStorage.getItem("repeat") || "off"
+    : "off";
 
 export default function useAudio(
   playlist = [],
@@ -14,33 +31,14 @@ export default function useAudio(
 ) {
   const audioRef = useRef(null);
 
-  /*
-   * --------------------------------------------------
-   * Playback source
-   * --------------------------------------------------
-   */
-
   const [currentIndex, setCurrentIndex] =
     useState(initialIndex);
 
   const [currentSong, setCurrentSong] =
-    useState(
-      playlist[initialIndex] || null
-    );
+    useState(() => playlist[initialIndex] || null);
 
-  /*
-   * When the current song comes from the queue,
-   * currentIndex is -1 because it does not belong
-   * to the library playlist.
-   */
   const [isQueueSong, setIsQueueSong] =
     useState(false);
-
-  /*
-   * --------------------------------------------------
-   * Player state
-   * --------------------------------------------------
-   */
 
   const [isPlaying, setIsPlaying] =
     useState(false);
@@ -57,139 +55,39 @@ export default function useAudio(
   const [loadingSong, setLoadingSong] =
     useState(false);
 
-  /*
-   * --------------------------------------------------
-   * Volume
-   * --------------------------------------------------
-   */
+  const [volume, setVolume] = useState(() =>
+    getStoredNumber("volume", 1, 0, 1)
+  );
 
-  const [volume, setVolume] = useState(() => {
-    if (typeof window === "undefined") {
-      return 1;
-    }
-
-    const saved =
-      localStorage.getItem("volume");
-
-    const value =
-      saved !== null
-        ? Number(saved)
-        : 1;
-
-    return Number.isFinite(value)
-      ? Math.max(0, Math.min(1, value))
-      : 1;
-  });
-
-  const [muted, setMuted] =
-    useState(false);
-
-  /*
-   * --------------------------------------------------
-   * Playback speed
-   * --------------------------------------------------
-   */
+  const [muted, setMuted] = useState(false);
 
   const [playbackRate, setPlaybackRate] =
-    useState(() => {
-      if (typeof window === "undefined") {
-        return 1;
-      }
-
-      const saved =
-        localStorage.getItem("speed");
-
-      const value =
-        saved !== null
-          ? Number(saved)
-          : 1;
-
-      return Number.isFinite(value)
-        ? value
-        : 1;
-    });
-
-  /*
-   * --------------------------------------------------
-   * Repeat
-   * --------------------------------------------------
-   */
+    useState(() =>
+      getStoredNumber("speed", 1, 0.25, 4)
+    );
 
   const [repeatMode, setRepeatMode] =
-    useState(() => {
-      if (typeof window === "undefined") {
-        return "off";
-      }
+    useState(getStoredRepeat);
 
-      return (
-        localStorage.getItem("repeat") ||
-        "off"
-      );
-    });
+  const [shuffle, setShuffle] = useState(() =>
+    getStoredBoolean("shuffle")
+  );
 
-  /*
-   * --------------------------------------------------
-   * Shuffle
-   * --------------------------------------------------
-   */
-
-  const [shuffle, setShuffle] =
-    useState(() => {
-      if (typeof window === "undefined") {
-        return false;
-      }
-
-      return (
-        localStorage.getItem("shuffle") ===
-        "true"
-      );
-    });
-
-  /*
-   * --------------------------------------------------
-   * Queue helpers
-   * --------------------------------------------------
-   */
-
-  const getQueue = useCallback(() => {
-    if (!queueApi) {
-      return [];
-    }
-
-    return Array.isArray(queueApi.queue)
-      ? queueApi.queue
-      : [];
-  }, [queueApi]);
+  /* Queue helpers */
 
   const removeQueueSong = useCallback(
     (index) => {
-      if (
-        !queueApi ||
-        typeof queueApi.removeFromQueue !==
-          "function"
-      ) {
-        return;
-      }
-
-      queueApi.removeFromQueue(index);
+      queueApi?.removeFromQueue?.(index);
     },
     [queueApi]
   );
 
-  /*
-   * --------------------------------------------------
-   * Create audio element
-   * --------------------------------------------------
-   */
+  /* Audio element */
 
   useEffect(() => {
     const audio = new Audio();
 
     audio.preload = "metadata";
-    audio.volume = volume;
-    audio.muted = muted;
-    audio.playbackRate = playbackRate;
-
     audioRef.current = audio;
 
     return () => {
@@ -199,41 +97,47 @@ export default function useAudio(
     };
   }, []);
 
-  /*
-   * --------------------------------------------------
-   * Load current song
-   * --------------------------------------------------
-   */
+  /* Sync audio settings */
 
   useEffect(() => {
     const audio = audioRef.current;
 
-    if (!audio || !currentSong) {
-      return;
-    }
+    if (!audio) return;
+
+    audio.volume = volume;
+    audio.muted = muted;
+    audio.playbackRate = playbackRate;
+  }, [volume, muted, playbackRate]);
+
+  /* Load current song */
+
+  useEffect(() => {
+    const audio = audioRef.current;
+
+    if (!audio || !currentSong?.audio) return;
 
     setLoadingSong(true);
-
-    audio.pause();
-
-    audio.src = currentSong.audio;
-
-    audio.load();
-
     setCurrentTime(0);
     setDuration(0);
     setBuffered(0);
 
-    const handleLoadedMetadata = () => {
-      setDuration(audio.duration || 0);
+    audio.pause();
+    audio.src = currentSong.audio;
+    audio.load();
+
+    const handleMetadata = () => {
+      setDuration(
+        Number.isFinite(audio.duration)
+          ? audio.duration
+          : 0
+      );
+
       setLoadingSong(false);
 
       if (isPlaying) {
-        audio
-          .play()
-          .catch(() => {
-            setIsPlaying(false);
-          });
+        audio.play().catch(() => {
+          setIsPlaying(false);
+        });
       }
     };
 
@@ -249,18 +153,15 @@ export default function useAudio(
 
     audio.addEventListener(
       "loadedmetadata",
-      handleLoadedMetadata
+      handleMetadata
     );
 
-    audio.addEventListener(
-      "error",
-      handleError
-    );
+    audio.addEventListener("error", handleError);
 
     return () => {
       audio.removeEventListener(
         "loadedmetadata",
-        handleLoadedMetadata
+        handleMetadata
       );
 
       audio.removeEventListener(
@@ -270,46 +171,32 @@ export default function useAudio(
     };
   }, [currentSong, isPlaying]);
 
-  /*
-   * --------------------------------------------------
-   * Play / Pause
-   * --------------------------------------------------
-   */
+  /* Playback */
 
   useEffect(() => {
     const audio = audioRef.current;
 
-    if (!audio) {
+    if (!audio) return;
+
+    if (!isPlaying) {
+      audio.pause();
       return;
     }
 
-    if (isPlaying) {
-      audio
-        .play()
-        .catch(() => {
-          setIsPlaying(false);
-        });
-    } else {
-      audio.pause();
-    }
+    audio.play().catch(() => {
+      setIsPlaying(false);
+    });
   }, [isPlaying]);
 
-  /*
-   * --------------------------------------------------
-   * Time / Duration / Buffer
-   * --------------------------------------------------
-   */
+  /* Audio events */
 
   useEffect(() => {
     const audio = audioRef.current;
 
-    if (!audio) {
-      return;
-    }
+    if (!audio) return;
 
-    const updateTime = () => {
+    const updateTime = () =>
       setCurrentTime(audio.currentTime);
-    };
 
     const updateDuration = () => {
       if (Number.isFinite(audio.duration)) {
@@ -317,10 +204,8 @@ export default function useAudio(
       }
     };
 
-    const updateProgress = () => {
-      if (audio.buffered.length === 0) {
-        return;
-      }
+    const updateBuffered = () => {
+      if (!audio.buffered.length) return;
 
       try {
         setBuffered(
@@ -329,7 +214,7 @@ export default function useAudio(
           )
         );
       } catch {
-        // Ignore invalid buffered ranges.
+        // Buffered range may change while reading.
       }
     };
 
@@ -345,7 +230,7 @@ export default function useAudio(
 
     audio.addEventListener(
       "progress",
-      updateProgress
+      updateBuffered
     );
 
     return () => {
@@ -361,70 +246,15 @@ export default function useAudio(
 
       audio.removeEventListener(
         "progress",
-        updateProgress
+        updateBuffered
       );
     };
   }, []);
 
-  /*
-   * --------------------------------------------------
-   * Volume
-   * --------------------------------------------------
-   */
+  /* Persist settings */
 
   useEffect(() => {
-    const audio = audioRef.current;
-
-    if (!audio) {
-      return;
-    }
-
-    audio.volume = volume;
-  }, [volume]);
-
-  /*
-   * --------------------------------------------------
-   * Mute
-   * --------------------------------------------------
-   */
-
-  useEffect(() => {
-    const audio = audioRef.current;
-
-    if (!audio) {
-      return;
-    }
-
-    audio.muted = muted;
-  }, [muted]);
-
-  /*
-   * --------------------------------------------------
-   * Playback speed
-   * --------------------------------------------------
-   */
-
-  useEffect(() => {
-    const audio = audioRef.current;
-
-    if (!audio) {
-      return;
-    }
-
-    audio.playbackRate = playbackRate;
-  }, [playbackRate]);
-
-  /*
-   * --------------------------------------------------
-   * Persist settings
-   * --------------------------------------------------
-   */
-
-  useEffect(() => {
-    localStorage.setItem(
-      "volume",
-      String(volume)
-    );
+    localStorage.setItem("volume", String(volume));
   }, [volume]);
 
   useEffect(() => {
@@ -435,10 +265,7 @@ export default function useAudio(
   }, [playbackRate]);
 
   useEffect(() => {
-    localStorage.setItem(
-      "repeat",
-      repeatMode
-    );
+    localStorage.setItem("repeat", repeatMode);
   }, [repeatMode]);
 
   useEffect(() => {
@@ -448,18 +275,12 @@ export default function useAudio(
     );
   }, [shuffle]);
 
-  /*
-   * --------------------------------------------------
-   * Play / Pause controls
-   * --------------------------------------------------
-   */
+  /* Play / pause */
 
   const play = useCallback(() => {
-    if (!currentSong) {
-      return;
+    if (currentSong) {
+      setIsPlaying(true);
     }
-
-    setIsPlaying(true);
   }, [currentSong]);
 
   const pause = useCallback(() => {
@@ -467,37 +288,29 @@ export default function useAudio(
   }, []);
 
   const togglePlay = useCallback(() => {
-    setIsPlaying((playing) => !playing);
+    setIsPlaying((value) => !value);
   }, []);
 
-  /*
-   * --------------------------------------------------
-   * Seek
-   * --------------------------------------------------
-   */
+  /* Seeking */
 
   const seek = useCallback(
     (time) => {
       const audio = audioRef.current;
 
-      if (!audio) {
-        return;
-      }
+      if (!audio) return;
 
-      const maxTime =
-        Number.isFinite(duration) &&
-        duration > 0
-          ? duration
-          : 0;
+      const max = Number.isFinite(duration)
+        ? Math.max(duration, 0)
+        : 0;
 
-      const value = Math.max(
+      const nextTime = clamp(
+        Number(time) || 0,
         0,
-        Math.min(time, maxTime)
+        max
       );
 
-      audio.currentTime = value;
-
-      setCurrentTime(value);
+      audio.currentTime = nextTime;
+      setCurrentTime(nextTime);
     },
     [duration]
   );
@@ -516,114 +329,65 @@ export default function useAudio(
     [currentTime, seek]
   );
 
-  /*
-   * --------------------------------------------------
-   * Volume controls
-   * --------------------------------------------------
-   */
+  /* Volume */
 
-  const changeVolume = useCallback(
-    (value) => {
-      const nextVolume = Math.max(
-        0,
-        Math.min(1, Number(value))
-      );
+  const changeVolume = useCallback((value) => {
+    const next = clamp(
+      Number(value) || 0,
+      0,
+      1
+    );
 
-      setVolume(nextVolume);
+    setVolume(next);
 
-      if (nextVolume > 0 && muted) {
-        setMuted(false);
-      }
-    },
-    [muted]
-  );
+    if (next > 0) {
+      setMuted(false);
+    }
+  }, []);
 
-  const adjustVolume = useCallback(
-    (amount) => {
-      setVolume((previous) =>
-        Math.max(
-          0,
-          Math.min(
-            1,
-            previous + amount
-          )
-        )
-      );
+  const adjustVolume = useCallback((amount) => {
+    setVolume((value) =>
+      clamp(value + amount, 0, 1)
+    );
 
-      if (amount > 0 && muted) {
-        setMuted(false);
-      }
-    },
-    [muted]
-  );
+    if (amount > 0) {
+      setMuted(false);
+    }
+  }, []);
 
   const toggleMute = useCallback(() => {
     setMuted((value) => !value);
   }, []);
 
-  /*
-   * --------------------------------------------------
-   * Repeat
-   * --------------------------------------------------
-   */
+  /* Repeat / shuffle / speed */
 
   const cycleRepeat = useCallback(() => {
-    setRepeatMode((current) => {
-      if (current === "off") {
-        return "all";
-      }
-
-      if (current === "all") {
-        return "one";
-      }
-
+    setRepeatMode((mode) => {
+      if (mode === "off") return "all";
+      if (mode === "all") return "one";
       return "off";
     });
   }, []);
-
-  /*
-   * --------------------------------------------------
-   * Shuffle
-   * --------------------------------------------------
-   */
 
   const toggleShuffle = useCallback(() => {
     setShuffle((value) => !value);
   }, []);
 
-  /*
-   * --------------------------------------------------
-   * Playback speed
-   * --------------------------------------------------
-   */
-
   const togglePlaybackRate = useCallback(() => {
-    const speeds = [
-      1,
-      1.25,
-      1.5,
-      2,
-    ];
+    const speeds = [1, 1.25, 1.5, 2];
 
     setPlaybackRate((current) => {
-      const currentPosition =
-        speeds.indexOf(current);
+      const index = speeds.indexOf(current);
 
-      const nextPosition =
-        currentPosition === -1
+      return speeds[
+        index === -1
           ? 0
-          : (currentPosition + 1) %
-            speeds.length;
-
-      return speeds[nextPosition];
+          : (index + 1) % speeds.length
+      ];
     });
   }, []);
 
-  /*
-   * --------------------------------------------------
-   * Select library song
-   * --------------------------------------------------
-   */
+  /* Song selection */
 
   const selectSong = useCallback(
     (index) => {
@@ -634,127 +398,84 @@ export default function useAudio(
         return;
       }
 
-      const song = playlist[index];
-
       setCurrentIndex(index);
-      setCurrentSong(song);
+      setCurrentSong(playlist[index]);
       setIsQueueSong(false);
       setIsPlaying(true);
     },
     [playlist]
   );
 
-  /*
-   * --------------------------------------------------
-   * Play a queue song
-   * --------------------------------------------------
-   */
+  const playQueueSong = useCallback((song) => {
+    if (!song) return;
 
-  const playQueueSong = useCallback(
-    (song) => {
-      if (!song) {
-        return;
-      }
+    setCurrentIndex(-1);
+    setCurrentSong(song);
+    setIsQueueSong(true);
+    setIsPlaying(true);
+  }, []);
 
-      setCurrentIndex(-1);
-      setCurrentSong(song);
-      setIsQueueSong(true);
-      setIsPlaying(true);
-    },
-    []
-  );
+  /* Random song */
 
-  /*
-   * --------------------------------------------------
-   * Next Song
-   *
-   * Priority:
-   *
-   * 1. Queue
-   * 2. Library
-   * 3. Repeat all
-   * 4. Stop
-   * --------------------------------------------------
-   */
+  const getRandomIndex = useCallback(() => {
+    if (playlist.length <= 1) return 0;
+
+    let index;
+
+    do {
+      index = Math.floor(
+        Math.random() * playlist.length
+      );
+    } while (index === currentIndex);
+
+    return index;
+  }, [currentIndex, playlist.length]);
+
+  /* Next */
 
   const nextSong = useCallback(() => {
-    /*
-     * Queue always takes priority over the
-     * normal library.
-     */
-    const currentQueue = getQueue();
+    const currentQueue = Array.isArray(
+      queueApi?.queue
+    )
+      ? queueApi.queue
+      : [];
 
-    if (currentQueue.length > 0) {
-      const nextQueuedSong =
-        currentQueue[0];
+    if (!playlist.length && !currentQueue.length) {
+      setIsPlaying(false);
+      return;
+    }
+
+    /* Queue always has priority. */
+
+    if (currentQueue.length) {
+      const next = currentQueue[0];
 
       removeQueueSong(0);
-
-      playQueueSong(nextQueuedSong);
+      playQueueSong(next);
 
       return;
     }
 
-    /*
-     * If the current song was a queue song,
-     * there is no playlist index to increment.
-     *
-     * Once its queue is exhausted, continue
-     * from the beginning of the library.
-     */
+    /* Queue finished → return to library. */
+
     if (isQueueSong) {
-      if (!playlist.length) {
-        setIsPlaying(false);
-        return;
-      }
+      const index = shuffle
+        ? getRandomIndex()
+        : 0;
 
-      if (shuffle) {
-        if (playlist.length === 1) {
-          setCurrentIndex(0);
-          setCurrentSong(playlist[0]);
-          setIsQueueSong(false);
-          setIsPlaying(true);
-          return;
-        }
-
-        let randomIndex;
-
-        do {
-          randomIndex = Math.floor(
-            Math.random() *
-              playlist.length
-          );
-        } while (
-          randomIndex === currentIndex
-        );
-
-        setCurrentIndex(randomIndex);
-        setCurrentSong(
-          playlist[randomIndex]
-        );
-        setIsQueueSong(false);
-        setIsPlaying(true);
-
-        return;
-      }
-
-      setCurrentIndex(0);
-      setCurrentSong(playlist[0]);
+      setCurrentIndex(index);
+      setCurrentSong(playlist[index]);
       setIsQueueSong(false);
       setIsPlaying(true);
 
       return;
     }
 
-    /*
-     * Normal library shuffle.
-     */
+    /* Library shuffle. */
+
     if (shuffle) {
-      if (playlist.length <= 1) {
-        if (
-          repeatMode === "all" &&
-          playlist.length === 1
-        ) {
+      if (playlist.length === 1) {
+        if (repeatMode === "all") {
           setCurrentIndex(0);
           setCurrentSong(playlist[0]);
           setIsPlaying(true);
@@ -763,33 +484,18 @@ export default function useAudio(
         return;
       }
 
-      let randomIndex;
+      const index = getRandomIndex();
 
-      do {
-        randomIndex = Math.floor(
-          Math.random() *
-            playlist.length
-        );
-      } while (
-        randomIndex === currentIndex
-      );
-
-      setCurrentIndex(randomIndex);
-      setCurrentSong(
-        playlist[randomIndex]
-      );
+      setCurrentIndex(index);
+      setCurrentSong(playlist[index]);
       setIsPlaying(true);
 
       return;
     }
 
-    /*
-     * End of normal library.
-     */
-    if (
-      currentIndex >=
-      playlist.length - 1
-    ) {
+    /* End of library. */
+
+    if (currentIndex >= playlist.length - 1) {
       if (repeatMode === "all") {
         setCurrentIndex(0);
         setCurrentSong(playlist[0]);
@@ -801,163 +507,95 @@ export default function useAudio(
       return;
     }
 
-    /*
-     * Normal next library song.
-     */
-    const nextIndex =
-      currentIndex + 1;
+    /* Normal next. */
+
+    const nextIndex = currentIndex + 1;
 
     setCurrentIndex(nextIndex);
-    setCurrentSong(
-      playlist[nextIndex]
-    );
+    setCurrentSong(playlist[nextIndex]);
     setIsPlaying(true);
   }, [
     currentIndex,
-    getQueue,
+    getRandomIndex,
     isQueueSong,
     playlist,
     playQueueSong,
+    queueApi,
     removeQueueSong,
     repeatMode,
     shuffle,
   ]);
 
-  /*
-   * --------------------------------------------------
-   * Previous Song
-   * --------------------------------------------------
-   */
+  /* Previous */
 
   const previousSong = useCallback(() => {
-    if (!currentSong) {
-      return;
-    }
+    if (!currentSong) return;
 
-    /*
-     * If the song has already played for more
-     * than three seconds, restart it.
-     */
     if (currentTime > 3) {
       seek(0);
       return;
     }
 
-    /*
-     * Queue songs don't have a library index.
-     *
-     * We restart the current queue song instead
-     * of trying to navigate backwards through
-     * the queue.
-     */
     if (isQueueSong) {
       seek(0);
       return;
     }
 
-    if (!playlist.length) {
-      return;
-    }
+    if (!playlist.length) return;
 
-    /*
-     * Shuffle previous.
-     */
     if (shuffle) {
-      if (playlist.length === 1) {
-        return;
-      }
+      if (playlist.length === 1) return;
 
-      let randomIndex;
+      const index = getRandomIndex();
 
-      do {
-        randomIndex = Math.floor(
-          Math.random() *
-            playlist.length
-        );
-      } while (
-        randomIndex === currentIndex
-      );
-
-      setCurrentIndex(randomIndex);
-      setCurrentSong(
-        playlist[randomIndex]
-      );
+      setCurrentIndex(index);
+      setCurrentSong(playlist[index]);
       setIsPlaying(true);
 
       return;
     }
 
-    /*
-     * Go to previous library song.
-     */
-    if (currentIndex === 0) {
-      setCurrentIndex(
-        playlist.length - 1
-      );
+    const index =
+      currentIndex === 0
+        ? playlist.length - 1
+        : currentIndex - 1;
 
-      setCurrentSong(
-        playlist[playlist.length - 1]
-      );
-    } else {
-      const previousIndex =
-        currentIndex - 1;
-
-      setCurrentIndex(previousIndex);
-      setCurrentSong(
-        playlist[previousIndex]
-      );
-    }
-
+    setCurrentIndex(index);
+    setCurrentSong(playlist[index]);
     setIsPlaying(true);
   }, [
     currentIndex,
     currentSong,
     currentTime,
+    getRandomIndex,
     isQueueSong,
     playlist,
     seek,
     shuffle,
   ]);
 
-  /*
-   * --------------------------------------------------
-   * Track ended
-   * --------------------------------------------------
-   */
+  /* Track ended */
 
   useEffect(() => {
     const audio = audioRef.current;
 
-    if (!audio) {
-      return;
-    }
+    if (!audio) return;
 
     const handleEnded = () => {
-      /*
-       * Repeat one always wins.
-       */
       if (repeatMode === "one") {
         audio.currentTime = 0;
 
-        audio
-          .play()
-          .catch(() => {
-            setIsPlaying(false);
-          });
+        audio.play().catch(() => {
+          setIsPlaying(false);
+        });
 
         return;
       }
 
-      /*
-       * Otherwise continue to the queue/library.
-       */
       nextSong();
     };
 
-    audio.addEventListener(
-      "ended",
-      handleEnded
-    );
+    audio.addEventListener("ended", handleEnded);
 
     return () => {
       audio.removeEventListener(
@@ -967,48 +605,14 @@ export default function useAudio(
     };
   }, [nextSong, repeatMode]);
 
-  /*
-   * --------------------------------------------------
-   * Keep current library song valid when the
-   * filtered playlist changes.
-   * --------------------------------------------------
-   */
+  /* Current library index */
 
-  useEffect(() => {
-    if (!playlist.length) {
-      return;
-    }
-
-    /*
-     * Never replace a currently playing queue song
-     * just because the library changed.
-     */
-    if (isQueueSong) {
-      return;
-    }
-
-    const currentSongExists =
-      playlist.some(
+  const currentLibraryIndex = !isQueueSong
+    ? playlist.findIndex(
         (song) =>
           song.id === currentSong?.id
-      );
-
-    if (!currentSongExists) {
-      setCurrentIndex(0);
-      setCurrentSong(playlist[0]);
-      setIsPlaying(false);
-    }
-  }, [
-    currentSong?.id,
-    isQueueSong,
-    playlist,
-  ]);
-
-  /*
-   * --------------------------------------------------
-   * Return API
-   * --------------------------------------------------
-   */
+      )
+    : -1;
 
   return {
     audioRef,
@@ -1030,6 +634,7 @@ export default function useAudio(
     isPlaying,
 
     isQueueSong,
+    currentLibraryIndex,
 
     setCurrentIndex,
     setVolume,
