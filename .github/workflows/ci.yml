@@ -13,27 +13,34 @@ permissions:
 
 jobs:
   build-and-test:
-    name: Check Next.js App
+    name: 🎧 Check if Ava broke MusicPlayer
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: 📦 Checkout repository
         uses: actions/checkout@v5
 
-      - name: Setup Node.js
+      - name: 🟢 Setup Node.js
         uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
 
-      - name: Install dependencies
+      - name: 📥 Install dependencies
         run: npm ci
 
-      - name: Type check
+      - name: 🔤 Ask TypeScript if everything makes sense
         run: npm run type-check
 
-      - name: Lint
+      - name: 🧹 Judge the code
         run: npm run lint
 
-      - name: Build Next.js app
+      - name: 🏗️ Build the thing
         run: npm run build
+
+      - name: 💀 Report failure
+        if: failure()
+        run: |
+          echo "💀 MusicPlayer CI has encountered a problem."
+          echo "Ava has been notified."
+          echo "Someone probably broke something."
